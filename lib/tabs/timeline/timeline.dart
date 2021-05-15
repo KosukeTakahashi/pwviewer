@@ -4,15 +4,19 @@ import 'package:html/parser.dart' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import '../../models/status.dart';
 import '../../models/account.dart';
 import '../../models/attachment.dart';
 import 'content_parser.dart';
+import '../../in_app_browser/my_chrome_safari_browser.dart';
 
 const LOCAL_TIMELINE_URL_WITH_LIMIT =
     'https://pawoo.net/api/v1/timelines/public/?local=true&limit=';
 
 class Timeline extends StatefulWidget {
+  final ChromeSafariBrowser browser = MyChromeSafariBrowser();
+
   @override
   _TimelineState createState() => _TimelineState();
 }
@@ -20,6 +24,15 @@ class Timeline extends StatefulWidget {
 class _TimelineState extends State<Timeline> {
   int _limit = 50;
   List<Status> _statusList = [];
+
+  Future _launchBrowser(String url) async {
+    await widget.browser.open(
+      url: Uri.parse(url),
+      options: ChromeSafariBrowserClassOptions(
+        ios: IOSSafariOptions(barCollapsingEnabled: true),
+      ),
+    );
+  }
 
   Widget _buildAvatar(BuildContext context, Account account) {
     return Container(
@@ -65,7 +78,8 @@ class _TimelineState extends State<Timeline> {
   Widget _buildContent(BuildContext context, Status status) {
     final parsed = html.parse(status.content);
     final paragraphs = parsed.querySelectorAll('p');
-    final contents = paragraphs.map((e) => parseContent(e)).toList();
+    final contents =
+        paragraphs.map((e) => parseContent(e, _launchBrowser)).toList();
 
     // return Text(status.content);
     return Column(

@@ -3,13 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:html/dom.dart' as dom;
-// import 'package:url_launcher/url_launcher.dart';
 
-void _launchUrl(String url) async {
-  // await canLaunch(url) ? await launch(url) : throw 'Cannot open URL $url';
-}
-
-TextSpan parseContent(dom.Element element) {
+TextSpan parseContent(dom.Element element, Future Function(String) urlOpen) {
   if (element.children.length == 0) {
     return TextSpan(text: element.text);
   } else {
@@ -30,14 +25,16 @@ TextSpan parseContent(dom.Element element) {
                 if (!isHashTag) {
                   final url = e.attributes['href'];
                   if (url != null) {
-                    _launchUrl(url);
+                    // open URL
+                    urlOpen(url);
                   }
                 }
               },
           );
         } else {
           return TextSpan(
-              children: e.children.map((f) => parseContent(f)).toList());
+              children:
+                  e.children.map((f) => parseContent(f, urlOpen)).toList());
         }
       }).toList(),
     );
