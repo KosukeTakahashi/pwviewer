@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:pwviewer/media_viewer/media_viewer.dart';
+import 'package:pwviewer/status_details/status_details.dart';
 import '../../models/status.dart';
 import '../../models/account.dart';
 import '../../models/attachment.dart';
@@ -31,6 +33,14 @@ class _TimelineState extends State<Timeline> {
       options: ChromeSafariBrowserClassOptions(
         ios: IOSSafariOptions(barCollapsingEnabled: true),
       ),
+    );
+  }
+
+  void _openMediaViewer(BuildContext context, Attachment attachment) {
+    Navigator.pushNamed(
+      context,
+      MediaViewer.routeName,
+      arguments: MediaViewerArguments(attachment),
     );
   }
 
@@ -100,7 +110,12 @@ class _TimelineState extends State<Timeline> {
           padding: EdgeInsets.only(top: 8),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: Image.network(attachment.previewUrl),
+            child: GestureDetector(
+              child: Image.network(attachment.previewUrl),
+              onTap: () {
+                _openMediaViewer(context, attachment);
+              },
+            ),
           ),
         );
       }).toList(),
@@ -230,42 +245,50 @@ class _TimelineState extends State<Timeline> {
   Widget _buildTile(BuildContext context, int index) {
     final status = _statusList[index];
 
-    return Container(
-        padding: EdgeInsets.all(8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Flexible(
-              flex: 0,
-              child: _buildAvatar(context, status.account),
-            ),
-            Flexible(
-              flex: 1,
-              child: Container(
-                padding: EdgeInsets.only(
-                  left: 8,
-                  right: 8,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeadline(context, status),
-                    _buildContent(context, status),
-                    _buildAttachments(context, status.mediaAttachments),
-                    Container(
-                      padding: EdgeInsets.only(top: 8),
-                      child: _buildTrailer(context, status),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(top: 8),
-                      child: _buildActions(context, status),
-                    ),
-                  ],
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        final args = StatusDetailsArguments(status);
+
+        Navigator.pushNamed(context, StatusDetails.routeName, arguments: args);
+      },
+      child: Container(
+          padding: EdgeInsets.all(8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                flex: 0,
+                child: _buildAvatar(context, status.account),
+              ),
+              Flexible(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.only(
+                    left: 8,
+                    right: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeadline(context, status),
+                      _buildContent(context, status),
+                      _buildAttachments(context, status.mediaAttachments),
+                      Container(
+                        padding: EdgeInsets.only(top: 8),
+                        child: _buildTrailer(context, status),
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(top: 8),
+                        child: _buildActions(context, status),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ));
+            ],
+          )),
+    );
   }
 
   Future _retrieveTimeline() async {

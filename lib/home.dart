@@ -7,7 +7,7 @@ import 'tabs/settings.dart';
 enum Pages { timeline, search, notifications, settings }
 
 class Home extends StatefulWidget {
-  final String pageName = '/';
+  static final String routeName = '/';
 
   @override
   _HomeState createState() => _HomeState();
