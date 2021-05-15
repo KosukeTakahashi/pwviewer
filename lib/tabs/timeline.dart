@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/status.dart';
 
-const LOCAL_TIMELINE_URL =
-    'https://pawoo.net/api/v1/timelines/public/?local=true&limit=50';
+const LOCAL_TIMELINE_URL_WITH_LIMIT =
+    'https://pawoo.net/api/v1/timelines/public/?local=true&limit=';
 
 class Timeline extends StatefulWidget {
   @override
@@ -12,7 +12,7 @@ class Timeline extends StatefulWidget {
 }
 
 class _TimelineState extends State<Timeline> {
-  // int _limit = 50;
+  int _limit = 50;
   List<Status> _statusList = [];
 
   Widget _buildTile(BuildContext context, int index) {
@@ -35,7 +35,7 @@ class _TimelineState extends State<Timeline> {
   }
 
   void retrieveTimeline() async {
-    final uri = Uri.parse(LOCAL_TIMELINE_URL);
+    final uri = Uri.parse(LOCAL_TIMELINE_URL_WITH_LIMIT + _limit.toString());
     final res = await http.get(uri);
     final statusList = jsonDecode(res.body);
 
