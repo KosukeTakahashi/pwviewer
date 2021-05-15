@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'tabs/timeline.dart';
+import 'tabs/timeline/timeline.dart';
 import 'tabs/search.dart';
 import 'tabs/notifications.dart';
 import 'tabs/settings.dart';

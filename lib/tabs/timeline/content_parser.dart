@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:html/dom.dart' as dom;
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
 void _launchUrl(String url) async {
-  await canLaunch(url) ? await launch(url) : throw 'Cannot open URL $url';
+  // await canLaunch(url) ? await launch(url) : throw 'Cannot open URL $url';
 }
 
 TextSpan parseContent(dom.Element element) {

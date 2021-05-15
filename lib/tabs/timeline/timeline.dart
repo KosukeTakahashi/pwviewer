@@ -4,10 +4,10 @@ import 'package:html/parser.dart' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import '../models/status.dart';
-import '../models/account.dart';
-import '../models/attachment.dart';
-import '../utils/content_parser.dart';
+import '../../models/status.dart';
+import '../../models/account.dart';
+import '../../models/attachment.dart';
+import 'content_parser.dart';
 
 const LOCAL_TIMELINE_URL_WITH_LIMIT =
     'https://pawoo.net/api/v1/timelines/public/?local=true&limit=';
