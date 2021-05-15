@@ -72,4 +72,47 @@ class State {
     this.bookmarked,
     this.pinned,
   );
+
+  State.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        uri = json['uri'],
+        createdAt = json['created_at'],
+        account = Account.fromJson(json['account']),
+        content = json['content'],
+        visibility = ToVisibility.fromString(json['visibility']),
+        sensitive = json['sensitive'],
+        spoilerText = json['spoiler_text'],
+        mediaAttachments = json['media_attachments']
+            .cast<Map<String, dynamic>>()
+            .map((e) => Attachment.fromJson(e))
+            .cast<Attachment>()
+            .toList(),
+        application = Application.fromJson(json['application']),
+        mentions = json['mentions']
+            .cast<Map<String, dynamic>>()
+            .map((e) => Mention.fromJson(e))
+            .cast<Mention>()
+            .toList(),
+        tags = json['tag']
+            .cast<Map<String, dynamic>>()
+            .map((e) => Tag.fromJson(e))
+            .cast<Tag>()
+            .toList(),
+        emojis = json['emojis']
+            .cast<Map<String, dynamic>>()
+            .map((e) => Emoji.fromJson(e))
+            .cast<Emoji>()
+            .toList(),
+        reblogsCount = json['reblogs_count'],
+        favouritesCount = json['favourites_count'],
+        repliesCount = json['replies_count'],
+        url = json['url'],
+        inReplyToId = json['in_reply_to_id'],
+        inReplyToAccountId = json['in_reply_to_account_id'],
+        language = json['language'],
+        text = json['text'],
+        favourited = json['favourited'],
+        muted = json['muted'],
+        bookmarked = json['bookmarked'],
+        pinned = json['pinned'];
 }

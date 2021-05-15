@@ -25,4 +25,15 @@ class Attachment {
     this.description,
     this.blurhash,
   );
+
+  Attachment.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        type = ToType.fromString(json['type']),
+        url = json['url'],
+        previewUrl = json['preview_url'],
+        remoteUrl = json['remote_url'],
+        textUrl = json['text_url'],
+        meta = json['meta'],
+        description = json['description'],
+        blurhash = json['blurhash'];
 }

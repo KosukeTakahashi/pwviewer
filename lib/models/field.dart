@@ -11,4 +11,9 @@ class Field {
     this.value,
     this.verifiedAt,
   );
+
+  Field.fromJson(Map<String, dynamic> json)
+      : name = json['name'],
+        value = json['value'],
+        verifiedAt = json['verified_at'];
 }

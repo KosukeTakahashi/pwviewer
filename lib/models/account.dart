@@ -61,4 +61,34 @@ class Account {
     this.suspended,
     this.muteExpiresAt,
   );
+
+  Account.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        username = json['username'],
+        acct = json['acct'],
+        url = json['url'],
+        displayName = json['display_name'],
+        note = json['note'],
+        avatar = json['avatar'],
+        avatarStatic = json['avatar_static'],
+        header = json['header'],
+        headerStatic = json['header_static'],
+        locked = json['locked'],
+        emojis = json['emojis']
+            .cast<Map<String, dynamic>>()
+            .map((e) => Emoji.fromJson(e))
+            .cast<Emoji>()
+            .toList(),
+        discoverable = json['discoverable'],
+        createdAt = json['created_at'],
+        lastStatusAt = json['last_status_at'],
+        statuesCount = json['statues_count'],
+        followersCount = json['followers_count'],
+        followingCount = json['following_count'],
+        moved = Account.fromJson(json['moved']),
+        fields = json['fields'],
+        bot = json['bot'],
+        source = json['source'],
+        suspended = json['suspended'],
+        muteExpiresAt = json['mute_expires_at'];
 }

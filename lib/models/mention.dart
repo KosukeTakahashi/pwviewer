@@ -11,4 +11,10 @@ class Mention {
     this.acct,
     this.url,
   );
+
+  Mention.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        username = json['username'],
+        acct = json['acct'],
+        url = json['acct'];
 }
