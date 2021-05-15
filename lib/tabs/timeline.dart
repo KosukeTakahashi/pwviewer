@@ -34,7 +34,7 @@ class _TimelineState extends State<Timeline> {
     );
   }
 
-  void retrieveTimeline() async {
+  Future _retrieveTimeline() async {
     final uri = Uri.parse(LOCAL_TIMELINE_URL_WITH_LIMIT + _limit.toString());
     final res = await http.get(uri);
     final statusList = jsonDecode(res.body);
@@ -56,14 +56,18 @@ class _TimelineState extends State<Timeline> {
       _statusList = [];
     });
 
-    retrieveTimeline();
+    _retrieveTimeline();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    return RefreshIndicator(
+      onRefresh: _retrieveTimeline,
+      child: ListView.separated(
         itemBuilder: _buildTile,
         separatorBuilder: (ctx, idx) => Divider(),
-        itemCount: _statusList.length);
+        itemCount: _statusList.length,
+      ),
+    );
   }
 }
