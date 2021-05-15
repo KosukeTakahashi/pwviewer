@@ -1,3 +1,5 @@
+import 'package:pwviewer/utils/maybe.dart';
+
 import 'account.dart';
 import 'visibility.dart';
 import 'attachment.dart';
@@ -17,7 +19,7 @@ class Status {
   bool sensitive;
   String spoilerText;
   List<Attachment> mediaAttachments;
-  Application application;
+  Application? application; // 含まれない場合がある？
 
   // Rendering attributes
   List<Mention> mentions;
@@ -87,7 +89,9 @@ class Status {
             .map((e) => Attachment.fromJson(e))
             .cast<Attachment>()
             .toList(),
-        application = Application.fromJson(json['application']),
+        application = Maybe<Map<String, dynamic>>.some(json['application'])
+            .map((v) => Application.fromJson(v))
+            .unwrapOrNull(),
         mentions = json['mentions']
             .cast<Map<String, dynamic>>()
             .map((e) => Mention.fromJson(e))
