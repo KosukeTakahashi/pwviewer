@@ -1,4 +1,4 @@
-enum Visibility {
+enum Privacy {
   public,
   unlisted,
   private,

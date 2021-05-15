@@ -2,6 +2,9 @@ import 'account.dart';
 import 'visibility.dart';
 import 'attachment.dart';
 import 'application.dart';
+import 'mention.dart';
+import 'tag.dart';
+import 'emoji.dart';
 
 class State {
   // Base attributes
@@ -17,9 +20,9 @@ class State {
   Application application;
 
   // Rendering attributes
-  // List<Mention> mentions;
-  // List<Tag> tags;
-  // List<Emoji> emojis;
+  List<Mention> mentions;
+  List<Tag> tags;
+  List<Emoji> emojis;
 
   // Informational attributes
   int reblogsCount;
@@ -43,29 +46,30 @@ class State {
   bool pinned;
 
   State(
-      this.id,
-      this.uri,
-      this.createdAt,
-      this.account,
-      this.content,
-      this.visibility,
-      this.sensitive,
-      this.spoilerText,
-      this.mediaAttachments,
-      this.application,
-      // this.mentions,
-      // this.tags,
-      // this.emojis,
-      this.reblogsCount,
-      this.favouritesCount,
-      this.repliesCount,
-      this.url,
-      this.inReplyToId,
-      this.inReplyToAccountId,
-      this.language,
-      this.text,
-      this.favourited,
-      this.muted,
-      this.bookmarked,
-      this.pinned);
+    this.id,
+    this.uri,
+    this.createdAt,
+    this.account,
+    this.content,
+    this.visibility,
+    this.sensitive,
+    this.spoilerText,
+    this.mediaAttachments,
+    this.application,
+    this.mentions,
+    this.tags,
+    this.emojis,
+    this.reblogsCount,
+    this.favouritesCount,
+    this.repliesCount,
+    this.url,
+    this.inReplyToId,
+    this.inReplyToAccountId,
+    this.language,
+    this.text,
+    this.favourited,
+    this.muted,
+    this.bookmarked,
+    this.pinned,
+  );
 }

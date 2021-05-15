@@ -1,25 +1,27 @@
+import 'type.dart';
+
 class Attachment {
   // Required attributes
   String id;
-  // Type type;
+  Type type;
   String url;
   String previewUrl;
 
   // Optional attributes
   String? remoteUrl;
   String? textUrl;
-  // Hash? meta;
+  dynamic? meta;
   String? description;
   String? blurhash;
 
   Attachment(
     this.id,
-    // this.type,
+    this.type,
     this.url,
     this.previewUrl,
     this.remoteUrl,
     this.textUrl,
-    // this.meta,
+    this.meta,
     this.description,
     this.blurhash,
   );

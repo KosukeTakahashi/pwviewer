@@ -11,5 +11,10 @@ class Application {
   String? clientSecret;
 
   Application(
-      this.name, this.website, this.vapidKey, this.clientId, this.clientSecret);
+    this.name,
+    this.website,
+    this.vapidKey,
+    this.clientId,
+    this.clientSecret,
+  );
 }
