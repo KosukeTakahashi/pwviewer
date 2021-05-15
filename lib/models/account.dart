@@ -1,6 +1,7 @@
 import 'emoji.dart';
 import 'field.dart';
 import 'source.dart';
+import '../utils/maybe.dart';
 
 class Account {
   // Base attributes
@@ -18,12 +19,12 @@ class Account {
   String headerStatic;
   bool locked;
   List<Emoji> emojis;
-  bool discoverable;
+  bool? discoverable; // v3.1.0 or higher
 
   // Statistical attributes
   String createdAt;
   String lastStatusAt;
-  int statuesCount;
+  int statusesCount;
   int followersCount;
   int followingCount;
 
@@ -51,7 +52,7 @@ class Account {
     this.discoverable,
     this.createdAt,
     this.lastStatusAt,
-    this.statuesCount,
+    this.statusesCount,
     this.followersCount,
     this.followingCount,
     this.moved,
@@ -82,11 +83,17 @@ class Account {
         discoverable = json['discoverable'],
         createdAt = json['created_at'],
         lastStatusAt = json['last_status_at'],
-        statuesCount = json['statues_count'],
+        statusesCount = json['statuses_count'],
         followersCount = json['followers_count'],
         followingCount = json['following_count'],
-        moved = Account.fromJson(json['moved']),
-        fields = json['fields'],
+        moved = Maybe<Map<String, dynamic>>.some(json['moved'])
+            .map((v) => Account.fromJson(v))
+            .unwrapOrNull(),
+        fields = json['fields']
+            .cast<Map<String, dynamic>>()
+            .map((e) => Field.fromJson(e))
+            .cast<Field>()
+            .toList(),
         bot = json['bot'],
         source = json['source'],
         suspended = json['suspended'],

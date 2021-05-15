@@ -40,10 +40,10 @@ class Status {
   String? text;
 
   // Authorized user attributes
-  bool favourited;
-  bool muted;
-  bool bookmarked;
-  bool pinned;
+  bool? favourited;
+  bool? muted;
+  bool? bookmarked;
+  bool? pinned;
 
   Status(
     this.id,
@@ -93,7 +93,7 @@ class Status {
             .map((e) => Mention.fromJson(e))
             .cast<Mention>()
             .toList(),
-        tags = json['tag']
+        tags = json['tags']
             .cast<Map<String, dynamic>>()
             .map((e) => Tag.fromJson(e))
             .cast<Tag>()
