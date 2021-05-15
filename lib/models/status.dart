@@ -6,7 +6,7 @@ import 'mention.dart';
 import 'tag.dart';
 import 'emoji.dart';
 
-class State {
+class Status {
   // Base attributes
   String id;
   String uri;
@@ -45,7 +45,7 @@ class State {
   bool bookmarked;
   bool pinned;
 
-  State(
+  Status(
     this.id,
     this.uri,
     this.createdAt,
@@ -73,7 +73,7 @@ class State {
     this.pinned,
   );
 
-  State.fromJson(Map<String, dynamic> json)
+  Status.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         uri = json['uri'],
         createdAt = json['created_at'],
