@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart' as html;
+import 'package:intl/intl.dart';
 import 'package:pwviewer/in_app_browser/my_chrome_safari_browser.dart';
 import 'package:pwviewer/media_viewer/media_viewer.dart';
 import 'package:pwviewer/models/account.dart';
@@ -39,20 +41,20 @@ class StatusDetails extends StatelessWidget {
     ));
   }
 
-  Widget _buildHeadline(BuildContext context, Status status) {
+  Widget _buildHeadline(BuildContext context, Account account) {
+    // final dateFormat = DateFormat('yyyy/MM/dd hh:mm:ss');
+    // final dateTimeString = dateFormat.format(DateTime.parse(status.createdAt));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          status.account.displayName,
+          account.displayName,
           style: Theme.of(context).textTheme.subtitle2,
         ),
         Text(
-          '@${status.account.username}',
-          style: Theme.of(context).textTheme.caption,
-        ),
-        Text(
-          'YYYY/MM/DD hh:mm:ss',
+          '@${account.username}',
           style: Theme.of(context).textTheme.caption,
         ),
       ],
@@ -91,6 +93,111 @@ class StatusDetails extends StatelessWidget {
                 },
               ))
           .toList(),
+    );
+  }
+
+  Widget _buildFavouritesCounter(BuildContext context, Status status) {
+    return Row(
+      children: [
+        Text(
+          status.favouritesCount.toString(),
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+        Text(
+          ' Favourites',
+          style: Theme.of(context).textTheme.caption,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReblogsCounter(BuildContext context, Status status) {
+    return Row(
+      children: [
+        Text(
+          status.reblogsCount.toString(),
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+        Text(
+          ' Reblogs',
+          style: Theme.of(context).textTheme.caption,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActions(BuildContext context, Status status) {
+    return Row(
+      children: [
+        Flexible(
+          flex: 1,
+          fit: FlexFit.tight,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              HapticFeedback.mediumImpact();
+            },
+            child: Icon(
+              Icons.comment_outlined,
+              color: Colors.grey,
+              // size: 14,
+            ),
+          ),
+          // label: Text(status.favouritesCount.toString()),
+        ),
+        Flexible(
+          flex: 1,
+          fit: FlexFit.tight,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              HapticFeedback.mediumImpact();
+            },
+            child: Icon(
+              Icons.repeat_outlined,
+              color: Colors.grey,
+              // size: 14,
+            ),
+          ),
+          // label: Text(status.favouritesCount.toString()),
+        ),
+        Flexible(
+          flex: 1,
+          fit: FlexFit.tight,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              HapticFeedback.mediumImpact();
+            },
+            child: Icon(
+              Icons.favorite_outline,
+              // size: 14,
+              color: status.favourited != null && (status.favourited!)
+                  ? Colors.red
+                  : Colors.grey,
+            ),
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          fit: FlexFit.tight,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              HapticFeedback.mediumImpact();
+            },
+            child: Icon(
+              Icons.share_outlined,
+              color: Colors.grey,
+              // size: 14,
+            ),
+          ),
+        ),
+        // Flexible(
+        //   flex: 1,
+        //   child: Container(),
+        // ),
+      ],
     );
   }
 
@@ -135,24 +242,32 @@ class StatusDetails extends StatelessWidget {
                         ),
                       ),
                       Flexible(
+                        fit: FlexFit.tight,
                         flex: 1,
                         child: Container(
                           padding: EdgeInsets.only(left: 16),
-                          child: _buildHeadline(context, args.status),
+                          child: _buildHeadline(context, args.status.account),
                         ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.only(top: 16),
+                  padding: EdgeInsets.only(top: 24),
                   child: _buildContent(context, args.status),
                 ),
                 Container(
-                  padding: EdgeInsets.only(top: 16),
+                  padding: EdgeInsets.only(top: 24),
                   child:
                       _buildAttachments(context, args.status.mediaAttachments),
                 ),
+                Divider(),
+                _buildFavouritesCounter(context, args.status),
+                Divider(),
+                _buildReblogsCounter(context, args.status),
+                Divider(),
+                _buildActions(context, args.status),
+                Divider(),
               ],
             ),
           ));
