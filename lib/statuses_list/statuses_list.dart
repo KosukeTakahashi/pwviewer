@@ -1,8 +1,6 @@
-import 'package:flutter/gestures.dart';
 import 'package:html/parser.dart' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:html/dom.dart' as dom;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:pwviewer/media_viewer/media_viewer.dart';
 import 'package:pwviewer/status_details/status_details.dart';
@@ -10,48 +8,7 @@ import 'package:pwviewer/models/status.dart';
 import 'package:pwviewer/models/account.dart';
 import 'package:pwviewer/models/attachment.dart';
 import 'package:pwviewer/in_app_browser/my_chrome_safari_browser.dart';
-
-TextSpan parseContent(BuildContext context, dom.Element element,
-    Future Function(String) urlOpen) {
-  if (element.children.length == 0) {
-    return TextSpan(
-      text: element.text,
-      style: Theme.of(context).textTheme.bodyText1,
-    );
-  } else {
-    return TextSpan(
-      children: element.children.map((e) {
-        if (e.localName == 'a') {
-          return TextSpan(
-            text: e.text,
-            // <a></a>に子要素はないものの仮定する
-            // children: e.children.map((f) => parseContent(f)).toList(),
-            style: TextStyle(color: Colors.blue),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                HapticFeedback.mediumImpact();
-                // とりあえず '#' で始まるか否かでハッシュタグかを判定
-                final isHashTag = e.text.startsWith('#');
-
-                if (!isHashTag) {
-                  final url = e.attributes['href'];
-                  if (url != null) {
-                    // open URL
-                    urlOpen(url);
-                  }
-                }
-              },
-          );
-        } else {
-          return TextSpan(
-              children: e.children
-                  .map((f) => parseContent(context, f, urlOpen))
-                  .toList());
-        }
-      }).toList(),
-    );
-  }
-}
+import 'package:pwviewer/utils/content_parser.dart';
 
 class StatusesList extends StatefulWidget {
   final ChromeSafariBrowser browser = MyChromeSafariBrowser();
