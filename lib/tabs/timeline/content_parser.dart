@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart';
 import 'package:html/dom.dart' as dom;
 
 TextSpan parseContent(dom.Element element, Future Function(String) urlOpen) {
