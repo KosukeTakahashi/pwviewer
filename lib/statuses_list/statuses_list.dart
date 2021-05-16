@@ -11,9 +11,13 @@ import 'package:pwviewer/models/account.dart';
 import 'package:pwviewer/models/attachment.dart';
 import 'package:pwviewer/in_app_browser/my_chrome_safari_browser.dart';
 
-TextSpan parseContent(dom.Element element, Future Function(String) urlOpen) {
+TextSpan parseContent(BuildContext context, dom.Element element,
+    Future Function(String) urlOpen) {
   if (element.children.length == 0) {
-    return TextSpan(text: element.text);
+    return TextSpan(
+      text: element.text,
+      style: Theme.of(context).textTheme.bodyText1,
+    );
   } else {
     return TextSpan(
       children: element.children.map((e) {
@@ -40,8 +44,9 @@ TextSpan parseContent(dom.Element element, Future Function(String) urlOpen) {
           );
         } else {
           return TextSpan(
-              children:
-                  e.children.map((f) => parseContent(f, urlOpen)).toList());
+              children: e.children
+                  .map((f) => parseContent(context, f, urlOpen))
+                  .toList());
         }
       }).toList(),
     );
@@ -122,8 +127,9 @@ class _StatusesListState extends State<StatusesList> {
   Widget _buildContent(BuildContext context, Status status) {
     final parsed = html.parse(status.content);
     final paragraphs = parsed.querySelectorAll('p');
-    final contents =
-        paragraphs.map((e) => parseContent(e, _launchBrowser)).toList();
+    final contents = paragraphs
+        .map((e) => parseContent(context, e, _launchBrowser))
+        .toList();
 
     // return Text(status.content);
     return Column(
