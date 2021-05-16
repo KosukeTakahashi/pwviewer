@@ -55,7 +55,7 @@ TextSpan parseContent(BuildContext context, dom.Element element,
 
 class StatusesList extends StatefulWidget {
   final ChromeSafariBrowser browser = MyChromeSafariBrowser();
-  List<Status> statuses;
+  final List<Status> statuses;
 
   StatusesList(this.statuses);
 

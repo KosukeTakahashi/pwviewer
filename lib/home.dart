@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'tabs/timeline/timeline.dart';
+import 'tabs/timeline.dart';
 import 'tabs/search.dart';
 import 'tabs/notifications.dart';
 import 'tabs/settings.dart';
@@ -16,13 +16,10 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   Pages _currentPage = Pages.timeline;
   Map<Pages, Widget> _pages = {};
-  // int _currentPageIndex;
-  // List<Widget> _pages;`
 
   void _onTap(int index) {
     setState(() {
       _currentPage = Pages.values[index];
-      // _currentPageIndex = index;
     });
   }
 
@@ -38,8 +35,6 @@ class _HomeState extends State<Home> {
         Pages.notifications: Notifications(),
         Pages.settings: Settings()
       };
-      // _currentPageIndex = 0;
-      // _pages = [TimeLine(), Search(), Notifications(), Settings()];
     });
   }
 
@@ -50,7 +45,6 @@ class _HomeState extends State<Home> {
         title: Text('PwViewer'),
       ),
       body: _pages[_currentPage],
-      // body: _pages[_currentPageIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
@@ -71,7 +65,6 @@ class _HomeState extends State<Home> {
           ),
         ],
         currentIndex: _currentPage.index,
-        // currentIndex: _currentPageIndex,
         onTap: _onTap,
         type: BottomNavigationBarType.fixed,
       ),
