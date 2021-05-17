@@ -35,7 +35,7 @@ class Status {
   String? url;
   String? inReplyToId;
   String? inReplyToAccountId;
-  // Status? reblog;
+  Status? reblog;
   // Poll? poll;
   // Card? card;
   String? language;
@@ -67,6 +67,7 @@ class Status {
     this.url,
     this.inReplyToId,
     this.inReplyToAccountId,
+    this.reblog,
     this.language,
     this.text,
     this.favourited,
@@ -113,6 +114,9 @@ class Status {
         url = json['url'],
         inReplyToId = json['in_reply_to_id'],
         inReplyToAccountId = json['in_reply_to_account_id'],
+        reblog = Maybe<Map<String, dynamic>>.some(json['reblog'])
+            .map((v) => Status.fromJson(v))
+            .unwrapOrNull(),
         language = json['language'],
         text = json['text'],
         favourited = json['favourited'],

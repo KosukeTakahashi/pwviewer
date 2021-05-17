@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:pwviewer/models/emoji.dart';
+import 'package:pwviewer/user_details/user_details.dart';
 import 'split_with_delimiter.dart';
 
 TextSpan parseContent(BuildContext context, dom.Element element,
@@ -23,45 +24,53 @@ TextSpan parseContent(BuildContext context, dom.Element element,
             if (url != null) {
               urlOpen(url);
             }
+          } else if (isUser) {
+            final url = element.attributes['href'];
+            if (url != null) {
+              final id = url.split('/').last;
+              final args = UserDetailsArguments(id);
+              Navigator.pushNamed(context, UserDetails.routeName,
+                  arguments: args);
+            }
           }
         },
     );
   } else if (element.localName == 'br') {
     return TextSpan(text: '\n');
   } else if (element.children.length == 0) {
-    final emojiPatterns =
-        emojis.map((emoji) => ':${emoji.shortcode}:').join('|');
-    final textParts = element.text.splitWithDelimiters(RegExp(emojiPatterns));
-    final spanChildren = textParts.map(
-      (text) {
-        if (emojis.indexWhere((element) => text == ':${element.shortcode}:') !=
-            -1) {
-          final emoji =
-              emojis.firstWhere((element) => ':${element.shortcode}:' == text);
-          return WidgetSpan(
-            child: Container(
-              height: 16,
-              child: Image.network(emoji.url),
-            ),
-          );
-        } else {
-          return TextSpan(text: text);
-        }
-      },
-    );
+    // final emojiPatterns =
+    //     emojis.map((emoji) => ':${emoji.shortcode}:').join('|');
+    // final textParts = element.text.splitWithDelimiters(RegExp(emojiPatterns));
+    // final spanChildren = textParts.map(
+    //   (text) {
+    //     if (emojis.indexWhere((element) => text == ':${element.shortcode}:') !=
+    //         -1) {
+    //       final emoji =
+    //           emojis.firstWhere((element) => ':${element.shortcode}:' == text);
+    //       return WidgetSpan(
+    //         child: Container(
+    //           height: 16,
+    //           child: Image.network(emoji.url),
+    //         ),
+    //       );
+    //     } else {
+    //       return TextSpan(text: text);
+    //     }
+    //   },
+    // );
 
-    return TextSpan(
-      // text: e.text,
-      children: spanChildren.toList(),
-      style: Theme.of(context).textTheme.bodyText1,
-    );
     // return TextSpan(
-    //   text: element.text,
+    //   // text: e.text,
+    //   children: spanChildren.toList(),
     //   style: Theme.of(context).textTheme.bodyText1,
     // );
+    return TextSpan(
+      text: element.text,
+      style: Theme.of(context).textTheme.bodyText1,
+    );
   } else {
-    final emojiPatterns =
-        emojis.map((emoji) => ':${emoji.shortcode}:').join('|');
+    // final emojiPatterns =
+    //     emojis.map((emoji) => ':${emoji.shortcode}:').join('|');
     return TextSpan(
       // children: element.children
       //     .map((e) => parseContent(context, e, urlOpen))
@@ -73,30 +82,30 @@ TextSpan parseContent(BuildContext context, dom.Element element,
           .map(
         (e) {
           if (e.nodeType == dom.Node.TEXT_NODE) {
-            final textParts =
-                e.text?.splitWithDelimiters(RegExp(emojiPatterns));
-            final spanChildren = textParts?.map(
-              (text) {
-                if (emojis.indexWhere(
-                        (element) => text == ':${element.shortcode}:') !=
-                    -1) {
-                  final emoji = emojis.firstWhere(
-                      (element) => ':${element.shortcode}:' == text);
-                  return WidgetSpan(
-                    child: Container(
-                      height: 16,
-                      child: Image.network(emoji.url),
-                    ),
-                  );
-                } else {
-                  return TextSpan(text: text);
-                }
-              },
-            );
+            // final textParts =
+            //     e.text?.splitWithDelimiters(RegExp(emojiPatterns));
+            // final spanChildren = textParts?.map(
+            //   (text) {
+            //     if (emojis.indexWhere(
+            //             (element) => text == ':${element.shortcode}:') !=
+            //         -1) {
+            //       final emoji = emojis.firstWhere(
+            //           (element) => ':${element.shortcode}:' == text);
+            //       return WidgetSpan(
+            //         child: Container(
+            //           height: 16,
+            //           child: Image.network(emoji.url),
+            //         ),
+            //       );
+            //     } else {
+            //       return TextSpan(text: text);
+            //     }
+            //   },
+            // );
 
             return TextSpan(
-              // text: e.text,
-              children: spanChildren?.toList(),
+              text: e.text,
+              // children: spanChildren?.toList(),
               style: Theme.of(context).textTheme.bodyText1,
             );
           } else {

@@ -15,14 +15,14 @@ class _SettingsState extends State<Settings> {
 
   Widget _buildAuthorization(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            width: 1.0,
-            color: Colors.grey.shade300,
-          ),
-        ),
-      ),
+      // decoration: BoxDecoration(
+      //   border: Border(
+      //     bottom: BorderSide(
+      //       width: 1.0,
+      //       color: Colors.grey.shade300,
+      //     ),
+      //   ),
+      // ),
       child: ListTile(
         leading: Icon(Icons.vpn_key),
         title: Text('認証キー'),
@@ -61,11 +61,11 @@ class _SettingsState extends State<Settings> {
 
   Widget _buildClearAuthKey(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(width: 1.0, color: Colors.grey.shade300),
-        ),
-      ),
+      // decoration: BoxDecoration(
+      //   border: Border(
+      //     bottom: BorderSide(width: 1.0, color: Colors.grey.shade300),
+      //   ),
+      // ),
       child: ListTile(
         leading: Icon(Icons.clear),
         title: Text('認証キーをクリア'),
@@ -117,11 +117,11 @@ class _SettingsState extends State<Settings> {
 
   Widget _buildTimelineLength(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(width: 1.0, color: Colors.grey.shade300),
-        ),
-      ),
+      // decoration: BoxDecoration(
+      //   border: Border(
+      //     bottom: BorderSide(width: 1.0, color: Colors.grey.shade300),
+      //   ),
+      // ),
       child: ListTile(
         leading: Icon(Icons.format_list_numbered),
         title: Text('タイムラインの長さ'),
@@ -135,6 +135,9 @@ class _SettingsState extends State<Settings> {
           );
 
           if (newLength != null) {
+            final prefs = await SharedPreferences.getInstance();
+            prefs.setInt(SHARED_PREFERENCES_KEY_TIMELINE_LENGTH, newLength);
+
             setState(() {
               _tlLength = newLength;
             });
@@ -167,8 +170,11 @@ class _SettingsState extends State<Settings> {
       child: ListView(
         children: [
           _buildAuthorization(context),
+          Divider(),
           _buildClearAuthKey(context),
+          Divider(),
           _buildTimelineLength(context),
+          Divider(),
         ],
       ),
       // child: _buildAuthorization(context),
@@ -189,6 +195,7 @@ class __AuthKeyEditorDialogState extends State<_AuthKeyEditorDialog> {
   String _inputKey = '';
   bool _isConfirming = false;
   bool _isValid = false;
+  TextEditingController? _textEdittingController;
 
   @override
   void initState() {
@@ -198,6 +205,8 @@ class __AuthKeyEditorDialogState extends State<_AuthKeyEditorDialog> {
       _inputKey = widget._prevAuthKey;
       _isConfirming = false;
       _isValid = true;
+      _textEdittingController =
+          new TextEditingController(text: widget._prevAuthKey);
     });
   }
 
@@ -207,6 +216,7 @@ class __AuthKeyEditorDialogState extends State<_AuthKeyEditorDialog> {
       title: Text('認証キー'),
       content: Container(
         child: TextFormField(
+          controller: _textEdittingController,
           enabled: true,
           obscureText: false,
           maxLines: 1,
@@ -302,10 +312,10 @@ class __TlLengthEditorDialogState extends State<_TlLengthEditorDialog> {
             ),
             Slider(
               label: '$_tlLength',
-              min: 10,
-              max: 100,
+              min: 5,
+              max: 40,
               value: _tlLength.toDouble(),
-              divisions: 18,
+              divisions: 7,
               onChanged: (v) {
                 setState(() {
                   _tlLength = v.toInt();

@@ -21,8 +21,12 @@ import 'package:pwviewer/utils/maybe.dart';
 
 class StatusDetailsArguments {
   final String statusId;
+  final Maybe<Account> rebloggedBy;
 
-  StatusDetailsArguments(this.statusId);
+  StatusDetailsArguments(this.statusId) : rebloggedBy = Maybe.nothing();
+
+  StatusDetailsArguments.reblogged(this.statusId, Account rebloggedBy)
+      : rebloggedBy = Maybe.some(rebloggedBy);
 }
 
 class StatusDetails extends StatefulWidget {
@@ -34,6 +38,7 @@ class StatusDetails extends StatefulWidget {
 }
 
 class _StatusDetailsState extends State<StatusDetails> {
+  Maybe<Account> _rebloggedBy = Maybe.nothing();
   Maybe<Status> _status = Maybe.nothing();
   Maybe<StatusContext> _statusContext = Maybe.nothing();
 
@@ -73,6 +78,31 @@ class _StatusDetailsState extends State<StatusDetails> {
             return StatusItem.replyAncestor(ancestorStatus, _launchBrowser);
           }
         },
+      );
+    }
+  }
+
+  Widget _buildReblog(BuildContext context, Status status) {
+    if (_rebloggedBy.isNothing()) {
+      return Container();
+    } else {
+      return Container(
+        padding: EdgeInsets.only(top: 8),
+        child: Row(
+          children: [
+            Icon(
+              Icons.repeat,
+              color: Theme.of(context).textTheme.caption!.color,
+              size: Theme.of(context).textTheme.caption!.fontSize,
+            ),
+            Container(
+                padding: EdgeInsets.only(left: 4),
+                child: Text(
+                  '${_rebloggedBy.unwrap().displayName} さんがブースト',
+                  style: Theme.of(context).textTheme.caption,
+                )),
+          ],
+        ),
       );
     }
   }
@@ -275,6 +305,7 @@ class _StatusDetailsState extends State<StatusDetails> {
       children: [
         _buildReplyTo(context, status),
         // Divider(),
+        _buildReblog(context, status),
         Container(
           padding: EdgeInsets.only(top: 16),
           child: Row(
@@ -373,9 +404,15 @@ class _StatusDetailsState extends State<StatusDetails> {
     if (res.statusCode == 200) {
       final status = Status.fromJson(jsonDecode(res.body));
 
-      setState(() {
-        _status = Maybe.some(status);
-      });
+      if (status.reblog == null) {
+        setState(() {
+          _status = Maybe.some(status);
+        });
+      } else {
+        setState(() {
+          _status = Maybe.some(status);
+        });
+      }
     } else {
       final snackBar =
           SnackBar(content: Text('Status Code: ${res.statusCode}'));
@@ -409,6 +446,10 @@ class _StatusDetailsState extends State<StatusDetails> {
           ModalRoute.of(context)?.settings.arguments as StatusDetailsArguments?;
       if (args != null) {
         _fetchStatus(args.statusId);
+
+        setState(() {
+          _rebloggedBy = args.rebloggedBy;
+        });
       } else {
         setState(() {
           _statusContext = Maybe.nothing();

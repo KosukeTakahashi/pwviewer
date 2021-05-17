@@ -23,7 +23,7 @@ class Account {
 
   // Statistical attributes
   String createdAt;
-  String lastStatusAt;
+  String? lastStatusAt;
   int statusesCount;
   int followersCount;
   int followingCount;

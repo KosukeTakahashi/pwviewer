@@ -20,11 +20,19 @@ class StatusItem extends StatelessWidget {
   final Status _status;
   final Future Function(String) _launchBrowser;
   final bool _isReplyAncestor;
+  final bool _allowJump;
 
-  StatusItem(this._status, this._launchBrowser) : _isReplyAncestor = false;
+  StatusItem(this._status, this._launchBrowser)
+      : _isReplyAncestor = false,
+        _allowJump = true;
 
   StatusItem.replyAncestor(this._status, this._launchBrowser)
-      : _isReplyAncestor = true;
+      : _isReplyAncestor = true,
+        _allowJump = true;
+
+  StatusItem.prohibitJump(this._status, this._launchBrowser)
+      : _isReplyAncestor = false,
+        _allowJump = false;
 
   void _openMediaViewer(BuildContext context, Attachment attachment) {
     Navigator.pushNamed(
@@ -246,7 +254,8 @@ class StatusItem extends StatelessWidget {
                   child: Icon(
                     Icons.favorite_outline,
                     size: 14,
-                    color: status.favourited != null && (status.favourited!)
+                    color: status.favourited != null &&
+                            (status.favourited ?? false)
                         ? Colors.red
                         : Theme.of(context).textTheme.bodyText1?.color,
                   ),
@@ -256,7 +265,8 @@ class StatusItem extends StatelessWidget {
                   child: Text(
                     status.favouritesCount.toString(),
                     style: TextStyle(
-                      color: status.favourited != null && (status.favourited!)
+                      color: status.favourited != null &&
+                              (status.favourited ?? false)
                           ? Colors.red
                           : Theme.of(context).textTheme.bodyText1?.color,
                     ),
@@ -296,76 +306,114 @@ class StatusItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
-        final args = StatusDetailsArguments(_status.id);
+      onTap: !_allowJump
+          ? null
+          : () {
+              // final args = StatusDetailsArguments(_status.id);
+              final args = _status.reblog == null
+                  ? StatusDetailsArguments(_status.id)
+                  : StatusDetailsArguments.reblogged(
+                      _status.reblog!.id,
+                      _status.account,
+                    );
 
-        Navigator.pushNamed(context, StatusDetails.routeName, arguments: args);
-      },
+              Navigator.pushNamed(context, StatusDetails.routeName,
+                  arguments: args);
+            },
       child: Container(
         padding: EdgeInsets.only(top: 8, bottom: 8),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Flexible(
-                  flex: 0,
-                  // child: _buildAvatar(context, _status.account),
-                  child: !_isReplyAncestor
-                      ? _buildAvatar(context, _status.account)
-                      : Column(
-                          mainAxisSize: MainAxisSize.max,
+        child: _status.reblog == null
+            ? IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: _isReplyAncestor
+                      ? CrossAxisAlignment.stretch
+                      : CrossAxisAlignment.start,
+                  children: [
+                    Flexible(
+                        flex: 0,
+                        // child: _buildAvatar(context, _status.account),
+                        child: !_isReplyAncestor
+                            ? _buildAvatar(context, _status.account)
+                            : Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Flexible(
+                                    flex: 0,
+                                    child:
+                                        _buildAvatar(context, _status.account),
+                                  ),
+                                  Flexible(
+                                    flex: 1,
+                                    child: Container(
+                                      width: 2.0,
+                                      // height: 20,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                ],
+                              )),
+                    Flexible(
+                      flex: 1,
+                      child: Container(
+                        padding: EdgeInsets.only(
+                          left: 8,
+                          right: 8,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Flexible(
-                              flex: 0,
-                              child: _buildAvatar(context, _status.account),
+                            _buildHeadline(context, _status),
+                            // Container(
+                            //   padding: EdgeInsets.only(top: 4),
+                            //   child: _buildInReplyTo(context, _status),
+                            // ),
+                            _buildContent(context, _status),
+                            Container(
+                              width: double.infinity,
+                              child: _buildAttachments(
+                                  context, _status.mediaAttachments),
                             ),
-                            Flexible(
-                              flex: 1,
-                              child: Container(
-                                width: 2.0,
-                                // height: 20,
-                                color: Colors.grey.shade400,
-                              ),
+                            Container(
+                              padding: EdgeInsets.only(top: 8),
+                              child: _buildTrailer(context, _status),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(top: 8),
+                              child: _buildActions(context, _status),
                             ),
                           ],
-                        )),
-              Flexible(
-                flex: 1,
-                child: Container(
-                  padding: EdgeInsets.only(
-                    left: 8,
-                    right: 8,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeadline(context, _status),
-                      // Container(
-                      //   padding: EdgeInsets.only(top: 4),
-                      //   child: _buildInReplyTo(context, _status),
-                      // ),
-                      _buildContent(context, _status),
-                      Container(
-                        width: double.infinity,
-                        child: _buildAttachments(
-                            context, _status.mediaAttachments),
+                        ),
                       ),
-                      Container(
-                        padding: EdgeInsets.only(top: 8),
-                        child: _buildTrailer(context, _status),
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(top: 8),
-                        child: _buildActions(context, _status),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(left: 2),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.repeat,
+                          color: Theme.of(context).textTheme.caption!.color,
+                          size: Theme.of(context).textTheme.caption!.fontSize,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 4),
+                          child: Text(
+                            '${_status.account.displayName} さんがブースト',
+                            style: Theme.of(context).textTheme.caption,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  StatusItem.prohibitJump(_status.reblog!, _launchBrowser),
+                ],
               ),
-            ],
-          ),
-        ),
       ),
     );
   }

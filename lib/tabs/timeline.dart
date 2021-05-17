@@ -22,6 +22,16 @@ class _TimelineState extends State<Timeline> {
   // List<Status> _statusList = [];
   Maybe<List<Status>> _statusList = Maybe.nothing();
 
+  Future _restoreTimelineLength() async {
+    final pref = await SharedPreferences.getInstance();
+    final len = pref.getInt(SHARED_PREFERENCES_KEY_TIMELINE_LENGTH) ??
+        SHARED_PREFERENCES_DEFAULT_TIMELINE_LENGTH;
+
+    setState(() {
+      _limit = len;
+    });
+  }
+
   Future _retrieveTimeline() async {
     final prefs = await SharedPreferences.getInstance();
     final authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY) ??
@@ -30,14 +40,14 @@ class _TimelineState extends State<Timeline> {
     if (authKey == SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY) {
       final uri = Uri.parse(getLocalTimelineUrl(_limit));
       final res = await http.get(uri);
-      final statusList = jsonDecode(res.body);
+      final List<Status> statusList = jsonDecode(res.body)
+          .cast<Map<String, dynamic>>()
+          .map((e) => Status.fromJson(e))
+          .cast<Status>()
+          .toList();
 
       setState(() {
-        _statusList = Maybe.some(statusList
-            .cast<Map<String, dynamic>>()
-            .map((e) => Status.fromJson(e))
-            .cast<Status>()
-            .toList());
+        _statusList = Maybe.some(statusList);
       });
     } else {
       final uri = Uri.parse(getHomeTimelineUrl(_limit));
@@ -74,7 +84,11 @@ class _TimelineState extends State<Timeline> {
   void initState() {
     super.initState();
 
-    _retrieveTimeline();
+    // _retrieveTimeline();
+    (() async {
+      await _restoreTimelineLength();
+      await _retrieveTimeline();
+    })();
   }
 
   @override

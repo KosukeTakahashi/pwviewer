@@ -8,6 +8,7 @@ const _STATUS_CONTEXT_URL_TRAILER = '/context';
 const _STATUS_URL = '$_HEADER/api/v1/statuses/';
 const _ACCOUNT_URL = '$_HEADER/api/v1/accounts/';
 const _ACCOUNT_VERIFICATION_URL = '$_ACCOUNT_URL/verify_credentials';
+const _SEARCH_URL = '$_HEADER/api/v2/search?q=';
 
 String getLocalTimelineUrl(int limit) {
   return _LOCAL_TIMELINE_URL_WITH_LIMIT + limit.toString();
@@ -35,4 +36,12 @@ String getAccountStatusesUrl(String accountId, {int limit = 20}) {
 
 String getAccountVerificationUrl() {
   return _ACCOUNT_VERIFICATION_URL;
+}
+
+String getSearchUrl(String query) {
+  return _SEARCH_URL + query;
+}
+
+String getSearchByUsernameUrl(String username) {
+  return _SEARCH_URL + '$username@pawoo.net';
 }

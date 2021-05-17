@@ -5,13 +5,16 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart' as html;
 import 'package:http/http.dart' as http;
 import 'package:pwviewer/avatar/avatar.dart';
+import 'package:pwviewer/constants/constants.dart';
 import 'package:pwviewer/in_app_browser/my_chrome_safari_browser.dart';
 import 'package:pwviewer/models/account.dart';
+import 'package:pwviewer/models/results.dart';
 import 'package:pwviewer/models/status.dart';
 import 'package:pwviewer/statuses_list/status_item.dart';
 import 'package:pwviewer/utils/content_parser.dart';
 import 'package:pwviewer/utils/maybe.dart';
 import 'package:pwviewer/utils/query_urls.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserDetailsArguments {
   final String accountId;
@@ -182,41 +185,112 @@ class _UserDetailsState extends State<UserDetails> {
   }
 
   Future _retrieveAccount(String accountId) async {
-    final uri = Uri.parse(getAccountUrl(accountId));
-    final res = await http.get(uri);
-    final account = Account.fromJson(jsonDecode(res.body));
+    if (accountId.startsWith('@')) {
+      final prefs = await SharedPreferences.getInstance();
+      final authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY);
 
-    setState(() {
-      _account = Maybe.some(account);
-    });
+      if (authKey == null) {
+        final snackBar = SnackBar(
+          content: Container(
+            padding: EdgeInsets.all(8),
+            child: Text('Auth Key is unset!\nSet authorization key!'),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+        return;
+      }
+
+      final searchUri =
+          Uri.parse(getSearchByUsernameUrl(accountId.substring(1)));
+      final searchRes = await http.get(searchUri, headers: {
+        REQUEST_HEADER_AUTHORIZATION:
+            REQUEST_HEADER_AUTHORIZATION_PREFIX + authKey
+      });
+
+      if (searchRes.statusCode == 200) {
+        final results = Results.fromJson(jsonDecode(searchRes.body));
+
+        setState(() {
+          _account = Maybe.some(results.accounts[0]);
+        });
+      } else if (searchRes.statusCode == 401) {
+        final snackBar = SnackBar(
+          content: Container(
+            padding: EdgeInsets.all(8),
+            child: Text('Server returned code 401: Unauthorized'),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } else {
+        final snackBar = SnackBar(
+          content: Container(
+            padding: EdgeInsets.all(8),
+            child: Text('User $accountId not found'),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    } else {
+      final uri = Uri.parse(getAccountUrl(accountId));
+      final res = await http.get(uri);
+
+      if (res.statusCode == 200) {
+        final account = Account.fromJson(jsonDecode(res.body));
+
+        setState(() {
+          _account = Maybe.some(account);
+        });
+      } else {
+        final snackBar = SnackBar(
+          content: Container(
+            padding: EdgeInsets.all(8),
+            child: Text('Server returned code ${res.statusCode}'),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    }
   }
 
   Future _retrieveStatuses(String accountId) async {
     // final uri = Uri.parse(getAccountStatusesUrl(accountId, 50));
     final uri = Uri.parse(_nextAccountStatusesUrl.isNothing()
-        ? getAccountStatusesUrl(accountId, limit: _statusesRetrievalUnit)
+        // ? getAccountStatusesUrl(accountId, limit: _statusesRetrievalUnit)
+        ? getAccountStatusesUrl(_account.map((v) => v.id).unwrap(),
+            limit: _statusesRetrievalUnit)
         : _nextAccountStatusesUrl.unwrap());
     final res = await http.get(uri);
     // final nextPage = res.headers['link']?.split(';').first;
-    final statuses = jsonDecode(res.body)
-        .cast<Map<String, dynamic>>()
-        .map((e) => Status.fromJson(e))
-        .cast<Status>()
-        .toList();
+    if (res.statusCode == 200) {
+      final statuses = jsonDecode(res.body)
+          .cast<Map<String, dynamic>>()
+          .map((e) => Status.fromJson(e))
+          .cast<Status>()
+          .toList();
 
-    var nextPage = res.headers['link']!.split(';').first;
-    nextPage = nextPage.substring(1, nextPage.length - 1);
+      var nextPage = res.headers['link']!.split(';').first;
+      nextPage = nextPage.substring(1, nextPage.length - 1);
 
-    if (_statuses.isNothing()) {
-      setState(() {
-        _nextAccountStatusesUrl = Maybe.some(nextPage);
-        _statuses = Maybe.some(statuses);
-      });
+      if (_statuses.isNothing()) {
+        setState(() {
+          _nextAccountStatusesUrl = Maybe.some(nextPage);
+          _statuses = Maybe.some(statuses);
+        });
+      } else {
+        setState(() {
+          _nextAccountStatusesUrl = Maybe.some(nextPage);
+          _statuses = Maybe.some(_statuses.unwrap()..addAll(statuses));
+        });
+      }
     } else {
-      setState(() {
-        _nextAccountStatusesUrl = Maybe.some(nextPage);
-        _statuses = Maybe.some(_statuses.unwrap()..addAll(statuses));
-      });
+      final snackBar = SnackBar(
+        content: Container(
+          padding: EdgeInsets.all(8),
+          child: Text('Server returned code ${res.statusCode}'),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
@@ -224,13 +298,13 @@ class _UserDetailsState extends State<UserDetails> {
   void initState() {
     super.initState();
 
-    Future.delayed(Duration.zero, () {
+    Future.delayed(Duration.zero, () async {
       final args =
           ModalRoute.of(context)?.settings.arguments as UserDetailsArguments?;
 
       if (args != null) {
-        _retrieveAccount(args.accountId);
-        _retrieveStatuses(args.accountId);
+        await _retrieveAccount(args.accountId);
+        await _retrieveStatuses(args.accountId);
       }
     });
   }
