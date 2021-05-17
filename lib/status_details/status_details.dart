@@ -14,6 +14,7 @@ import 'package:pwviewer/models/attachment.dart';
 import 'package:pwviewer/models/status.dart';
 import 'package:pwviewer/models/status_context.dart';
 import 'package:pwviewer/status_details/reply.dart';
+import 'package:pwviewer/statuses_list/status_item.dart';
 import 'package:pwviewer/utils/content_parser.dart';
 import 'package:pwviewer/utils/query_urls.dart';
 import 'package:pwviewer/utils/maybe.dart';
@@ -45,6 +46,37 @@ class _StatusDetailsState extends State<StatusDetails> {
     );
   }
 
+  Widget _buildReplyTo(BuildContext context, Status status) {
+    if (status.inReplyToId == null) {
+      return Container();
+    } else {
+      final retrieveAncestorStatus = () async {
+        final uri = Uri.parse(getStatusUrl(status.inReplyToId!));
+        final res = await http.get(uri);
+
+        if (res.statusCode == 200) {
+          return Status.fromJson(jsonDecode(res.body));
+        } else {
+          return Future.error('Server returned code ${res.statusCode}');
+        }
+      };
+
+      return FutureBuilder(
+        future: retrieveAncestorStatus(),
+        builder: (context, dataSnapshot) {
+          if (dataSnapshot.connectionState != ConnectionState.done) {
+            return Container();
+          } else if (dataSnapshot.hasError) {
+            return Text('Error: ${dataSnapshot.error}');
+          } else {
+            final ancestorStatus = dataSnapshot.data as Status;
+            return StatusItem.replyAncestor(ancestorStatus, _launchBrowser);
+          }
+        },
+      );
+    }
+  }
+
   Widget _buildAvatar(BuildContext context, Account account) {
     return Container(
       child: Avatar(account, 64),
@@ -71,8 +103,8 @@ class _StatusDetailsState extends State<StatusDetails> {
   Widget _buildContent(BuildContext context, Status status) {
     final parsed = html.parse(status.content);
     final paragraphs = parsed.querySelectorAll('p');
-    final contents =
-        paragraphs.map((e) => parseContent(context, e, _launchBrowser));
+    final contents = paragraphs
+        .map((e) => parseContent(context, e, status.emojis, _launchBrowser));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,6 +273,8 @@ class _StatusDetailsState extends State<StatusDetails> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildReplyTo(context, status),
+        // Divider(),
         Container(
           padding: EdgeInsets.only(top: 16),
           child: Row(

@@ -82,8 +82,8 @@ class _UserDetailsState extends State<UserDetails> {
   Widget _buildNote(BuildContext context, Account account) {
     final parsed = html.parse(account.note);
     final paragraphs = parsed.querySelectorAll('p');
-    final contents =
-        paragraphs.map((e) => parseContent(context, e, _launchBrowser));
+    final contents = paragraphs
+        .map((e) => parseContent(context, e, account.emojis, _launchBrowser));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
