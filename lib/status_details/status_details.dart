@@ -253,10 +253,14 @@ class _StatusDetailsState extends State<StatusDetails> {
           child: _buildContent(context, status),
         ),
         Container(
+          width: double.infinity,
           padding: EdgeInsets.only(top: 24),
           child: _buildAttachments(context, status.mediaAttachments),
         ),
-        _buildTrailer(context, status),
+        Container(
+          padding: EdgeInsets.only(top: 12),
+          child: _buildTrailer(context, status),
+        ),
         Divider(),
         _buildFavouritesCounter(context, status),
         Divider(),
