@@ -393,7 +393,7 @@ class StatusItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: EdgeInsets.only(left: 2),
+                    padding: EdgeInsets.only(left: 64),
                     child: Row(
                       children: [
                         Icon(
