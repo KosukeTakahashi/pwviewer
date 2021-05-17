@@ -72,10 +72,15 @@ class StatusItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: contents
-          .map((e) => RichText(
+          .map(
+            (e) => Container(
+              padding: EdgeInsets.only(top: 4),
+              child: RichText(
                 text: e,
                 textScaleFactor: MediaQuery.of(context).textScaleFactor,
-              ))
+              ),
+            ),
+          )
           .toList(),
     );
   }
