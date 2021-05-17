@@ -23,6 +23,10 @@ class Maybe<T> {
     return this.value;
   }
 
+  bool isNothing() {
+    return value == null;
+  }
+
   Maybe<U> map<U>(U Function(T) projection) {
     return this.value == null
         ? Maybe<U>.nothing()

@@ -5,40 +5,48 @@ import 'package:html/dom.dart' as dom;
 
 TextSpan parseContent(BuildContext context, dom.Element element,
     Future Function(String) urlOpen) {
-  if (element.children.length == 0) {
+  if (element.localName == 'a') {
+    return TextSpan(
+      text: element.text,
+      style: TextStyle(color: Colors.blue),
+      recognizer: TapGestureRecognizer()
+        ..onTap = () {
+          HapticFeedback.mediumImpact();
+
+          final isHashTag = element.text.startsWith('#');
+
+          if (!isHashTag) {
+            final url = element.attributes['href'];
+            if (url != null) {
+              urlOpen(url);
+            }
+          }
+        },
+    );
+  } else if (element.localName == 'br') {
+    return TextSpan(text: '\n');
+  } else if (element.children.length == 0) {
     return TextSpan(
       text: element.text,
       style: Theme.of(context).textTheme.bodyText1,
     );
   } else {
     return TextSpan(
-      children: element.children.map((e) {
-        if (e.localName == 'a') {
+      // children: element.children
+      //     .map((e) => parseContent(context, e, urlOpen))
+      //     .toList(),
+      children: element.nodes
+          .where((element) =>
+              element.nodeType == dom.Node.TEXT_NODE ||
+              element.nodeType == dom.Node.ELEMENT_NODE)
+          .map((e) {
+        if (e.nodeType == dom.Node.TEXT_NODE) {
           return TextSpan(
             text: e.text,
-            // <a></a>に子要素はないものの仮定する
-            // children: e.children.map((f) => parseContent(f)).toList(),
-            style: TextStyle(color: Colors.blue),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                HapticFeedback.mediumImpact();
-                // とりあえず '#' で始まるか否かでハッシュタグかを判定
-                final isHashTag = e.text.startsWith('#');
-
-                if (!isHashTag) {
-                  final url = e.attributes['href'];
-                  if (url != null) {
-                    // open URL
-                    urlOpen(url);
-                  }
-                }
-              },
+            style: Theme.of(context).textTheme.bodyText1,
           );
         } else {
-          return TextSpan(
-              children: e.children
-                  .map((f) => parseContent(context, f, urlOpen))
-                  .toList());
+          return parseContent(context, e as dom.Element, urlOpen);
         }
       }).toList(),
     );

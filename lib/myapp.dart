@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pwviewer/media_viewer/media_viewer.dart';
 import 'package:pwviewer/status_details/status_details.dart';
+import 'package:pwviewer/user_details/user_details.dart';
 import 'home.dart';
 
 class MyApp extends StatelessWidget {
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
         Home.routeName: (context) => Home(),
         MediaViewer.routeName: (context) => MediaViewer(),
         StatusDetails.routeName: (context) => StatusDetails(),
+        UserDetails.routeName: (context) => UserDetails(),
       },
     );
   }
