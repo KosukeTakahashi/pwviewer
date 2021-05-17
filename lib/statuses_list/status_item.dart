@@ -82,6 +82,7 @@ class StatusItem extends StatelessWidget {
 
   Widget _buildAttachments(BuildContext context, List<Attachment> attachments) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: attachments.map((attachment) {
         return Container(
           padding: EdgeInsets.only(top: 8),
@@ -252,7 +253,11 @@ class StatusItem extends StatelessWidget {
                     children: [
                       _buildHeadline(context, _status),
                       _buildContent(context, _status),
-                      _buildAttachments(context, _status.mediaAttachments),
+                      Container(
+                        width: double.infinity,
+                        child: _buildAttachments(
+                            context, _status.mediaAttachments),
+                      ),
                       Container(
                         padding: EdgeInsets.only(top: 8),
                         child: _buildTrailer(context, _status),

@@ -147,6 +147,21 @@ class _StatusDetailsState extends State<StatusDetails> {
     );
   }
 
+  Widget _buildRepliesCounter(BuildContext context, Status status) {
+    return Row(
+      children: [
+        Text(
+          status.repliesCount.toString(),
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+        Text(
+          '件のリプライ',
+          style: Theme.of(context).textTheme.caption,
+        ),
+      ],
+    );
+  }
+
   Widget _buildActions(BuildContext context, Status status) {
     return Row(
       children: [
@@ -266,6 +281,8 @@ class _StatusDetailsState extends State<StatusDetails> {
         Divider(),
         _buildReblogsCounter(context, status),
         Divider(),
+        _buildRepliesCounter(context, status),
+        Divider(),
         Container(
           padding: EdgeInsets.only(bottom: 8),
           child: _buildActions(context, status),
@@ -275,13 +292,16 @@ class _StatusDetailsState extends State<StatusDetails> {
   }
 
   Widget _buildReplyTileOf(BuildContext context, Status status) {
-    return Reply(status);
+    return Container(
+      padding: EdgeInsets.only(left: 16, right: 16),
+      child: Reply(status),
+    );
   }
 
   Widget Function(BuildContext, int) _getTilesBuilder(Maybe<Status> status) {
     if (status.isNothing()) {
       return (context, index) => Container(
-            // padding: EdgeInsets.all(16),
+            padding: EdgeInsets.only(left: 16, right: 16),
             height: 400,
             child: Center(
               child: CircularProgressIndicator(),
@@ -290,17 +310,23 @@ class _StatusDetailsState extends State<StatusDetails> {
     } else {
       return (context, index) {
         if (index == 0) {
-          return _buildStatusTile(context, status.unwrap());
+          return Container(
+            padding: EdgeInsets.only(left: 16, right: 16),
+            child: _buildStatusTile(context, status.unwrap()),
+          );
         } else {
           return _statusContext.isNothing()
               ? Container(
+                  padding: EdgeInsets.only(left: 16, right: 16),
                   height: 200,
                   child: Center(
                     child: CircularProgressIndicator(),
                   ),
                 )
               : _buildReplyTileOf(
-                  context, _statusContext.unwrap().descendants[index - 1]);
+                  context,
+                  _statusContext.unwrap().descendants[index - 1],
+                );
         }
       };
     }
@@ -393,15 +419,24 @@ class _StatusDetailsState extends State<StatusDetails> {
     } else {
       return Scaffold(
         appBar: appBar,
-        body: Container(
-          padding: EdgeInsets.only(left: 16, right: 16),
-          child: ListView.separated(
+        // body: Container(
+        //   padding: EdgeInsets.only(left: 16, right: 16),
+        //   child: ListView.separated(
+        //     itemBuilder: _getTilesBuilder(_status),
+        //     separatorBuilder: (ctx, idx) => Divider(),
+        //     itemCount:
+        //         _status.isNothing() ? 1 : _status.unwrap().repliesCount + 1,
+        //   ),
+        // ),
+        body: ListView.separated(
             itemBuilder: _getTilesBuilder(_status),
             separatorBuilder: (ctx, idx) => Divider(),
             itemCount:
-                _status.isNothing() ? 1 : _status.unwrap().repliesCount + 1,
-          ),
-        ),
+                // _status.isNothing() ? 1 : _status.unwrap().repliesCount + 1,
+                _statusContext
+                        .map((v) => v.descendants.length + 1)
+                        .unwrapOrNull() ??
+                    1),
       );
     }
   }
