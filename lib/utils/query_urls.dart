@@ -1,3 +1,5 @@
+import 'package:pwviewer/models/search_types.dart';
+
 const _HEADER = 'https://pawoo.net';
 
 const _LOCAL_TIMELINE_URL_WITH_LIMIT =
@@ -9,6 +11,8 @@ const _STATUS_URL = '$_HEADER/api/v1/statuses/';
 const _ACCOUNT_URL = '$_HEADER/api/v1/accounts/';
 const _ACCOUNT_VERIFICATION_URL = '$_ACCOUNT_URL/verify_credentials';
 const _SEARCH_URL = '$_HEADER/api/v2/search?q=';
+const _SEARCH_URL_TYPE_OPTION = 'type=';
+const _SEARCH_URL_OFFSET_OPTION = 'offset=';
 
 String getLocalTimelineUrl(int limit) {
   return _LOCAL_TIMELINE_URL_WITH_LIMIT + limit.toString();
@@ -40,6 +44,10 @@ String getAccountVerificationUrl() {
 
 String getSearchUrl(String query) {
   return _SEARCH_URL + query;
+}
+
+String getSearchWithTypeUrl(String query, SearchTypes type, {int offset = 0}) {
+  return '$_SEARCH_URL$query&$_SEARCH_URL_TYPE_OPTION${type.name}&$_SEARCH_URL_OFFSET_OPTION$offset';
 }
 
 String getSearchByUsernameUrl(String username) {

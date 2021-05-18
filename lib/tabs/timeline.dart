@@ -18,7 +18,7 @@ class Timeline extends StatefulWidget {
 }
 
 class _TimelineState extends State<Timeline> {
-  int _limit = 50;
+  int _limit = 20;
   // List<Status> _statusList = [];
   Maybe<List<Status>> _statusList = Maybe.nothing();
 

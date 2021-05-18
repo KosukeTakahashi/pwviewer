@@ -23,7 +23,7 @@ class UserItem extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         Text(
-          '@${userAccount.username}',
+          '@${userAccount.acct}',
           style: Theme.of(context).textTheme.caption,
           overflow: TextOverflow.ellipsis,
         ),

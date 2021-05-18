@@ -269,8 +269,8 @@ class _UserDetailsState extends State<UserDetails> {
           .cast<Status>()
           .toList();
 
-      var nextPage = res.headers['link']!.split(';').first;
-      nextPage = nextPage.substring(1, nextPage.length - 1);
+      var nextPage = res.headers['link']?.split(';').first;
+      nextPage = nextPage?.substring(1, nextPage.length - 1);
 
       if (_statuses.isNothing()) {
         setState(() {
@@ -347,7 +347,7 @@ class _UserDetailsState extends State<UserDetails> {
                   : 1 +
                       min(
                         _account.unwrapOrNull()?.statusesCount ?? 0,
-                        _statuses.unwrap().length + 1,
+                        _statuses.unwrap().length,
                       ),
         ),
       );

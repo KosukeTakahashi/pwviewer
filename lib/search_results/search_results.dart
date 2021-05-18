@@ -1,19 +1,17 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:pwviewer/constants/constants.dart';
+import 'package:pwviewer/hashtag_list/hashtag_list.dart';
 import 'package:pwviewer/models/results.dart';
+import 'package:pwviewer/models/search_types.dart';
+import 'package:pwviewer/statuses_list/statuses_list.dart';
 import 'package:pwviewer/users_list/user_item.dart';
 import 'package:pwviewer/utils/maybe.dart';
 import 'package:pwviewer/utils/query_urls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-enum _ResultOf {
-  users,
-  statuses,
-  hashtags,
-}
 
 class SearchResultsArguments {
   String searchQuery;
@@ -30,8 +28,14 @@ class SearchResults extends StatefulWidget {
 
 class _SearchResultsState extends State<SearchResults> {
   Maybe<Results> _searchResults = Maybe.nothing();
+  bool _moreUsersResultExists = true;
+  bool _moreStatusesResultExists = true;
+  bool _moreHashtagsResultExists = true;
 
   Widget _buildUsersList(BuildContext context) {
+    final accounts = _searchResults.map((v) =>
+        v.accounts.where((element) => element.discoverable ?? true).toList());
+
     return ListView.separated(
       itemBuilder: (context, index) {
         if (_searchResults.isNothing()) {
@@ -42,14 +46,168 @@ class _SearchResultsState extends State<SearchResults> {
             ),
           );
         } else {
-          return UserItem(
-              _searchResults.map((v) => v.accounts[index]).unwrap());
+          if (index == accounts.unwrap().length) {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as SearchResultsArguments;
+            final query = args.searchQuery;
+
+            _retrieveMoreResultsOf(
+                query, SearchTypes.users, accounts.unwrap().length);
+            return Center(
+              child: Container(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else {
+            return UserItem(accounts.unwrap()[index]);
+          }
         }
       },
       separatorBuilder: (ctx, idx) => Divider(),
-      itemCount:
-          _searchResults.map((v) => v.accounts.length).unwrapOrNull() ?? 1,
+      itemCount: _searchResults
+              .map((v) => v.accounts.length + (_moreUsersResultExists ? 1 : 0))
+              .unwrapOrNull() ??
+          1,
     );
+  }
+
+  // TODO: read more 対応
+  Widget _buildStatusesList(BuildContext context) {
+    final statuses = _searchResults.map((v) => v.statuses);
+
+    if (statuses.isNothing()) {
+      return ListView(
+        children: [
+          Center(
+            child: CircularProgressIndicator(),
+          ),
+        ],
+      );
+    } else {
+      // return StatusesList(statuses.unwrap());
+      if (statuses.unwrap().isEmpty) {
+        return Center(
+          child: Text('結果なし'),
+        );
+      } else {
+        return StatusesList(statuses.unwrap());
+      }
+    }
+  }
+
+  Widget _buildHashtagsList(BuildContext context) {
+    final tags = _searchResults.map((v) => v.hashtags);
+
+    if (tags.isNothing()) {
+      return ListView(
+        children: [
+          Center(
+            child: CircularProgressIndicator(),
+          ),
+        ],
+      );
+    } else {
+      if (tags.unwrap().isEmpty) {
+        return Center(
+          child: Text('結果なし'),
+        );
+      } else {
+        if (_moreHashtagsResultExists) {
+          return HashtagList.withReadMore(tags.unwrap(), () {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as SearchResultsArguments;
+            _retrieveMoreResultsOf(
+                args.searchQuery, SearchTypes.hashtags, tags.unwrap().length);
+          });
+        } else {
+          return HashtagList(tags.unwrap());
+        }
+      }
+    }
+  }
+
+  Future _retrieveMoreResultsOf(
+      String searchQuery, SearchTypes type, int offset) async {
+    final prefs = await SharedPreferences.getInstance();
+    final authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY);
+
+    final uri =
+        Uri.parse(getSearchWithTypeUrl(searchQuery, type, offset: offset));
+    final res = await http.get(
+      uri,
+      headers: authKey != null
+          ? {
+              REQUEST_HEADER_AUTHORIZATION:
+                  REQUEST_HEADER_AUTHORIZATION_PREFIX + authKey
+            }
+          : {},
+    );
+
+    if (res.statusCode == 200) {
+      final results = Results.fromJson(jsonDecode(res.body));
+
+      switch (type) {
+        case SearchTypes.users:
+          if (results.accounts.isEmpty) {
+            setState(() {
+              _moreUsersResultExists = false;
+            });
+          } else {
+            setState(() {
+              _searchResults.unwrapOrNull()?.accounts.addAll(results.accounts);
+              _moreUsersResultExists = true;
+            });
+          }
+          break;
+        case SearchTypes.statuses:
+          if (results.statuses.isEmpty) {
+            setState(() {
+              _moreStatusesResultExists = false;
+            });
+          } else {
+            setState(() {
+              _searchResults.unwrapOrNull()?.statuses.addAll(results.statuses);
+              _moreStatusesResultExists = true;
+            });
+          }
+          break;
+        case SearchTypes.hashtags:
+          if (results.hashtags.isEmpty) {
+            setState(() {
+              _moreHashtagsResultExists = false;
+            });
+          } else {
+            setState(() {
+              _searchResults.unwrapOrNull()?.hashtags.addAll(results.hashtags);
+              _moreHashtagsResultExists = true;
+            });
+          }
+          break;
+      }
+
+      // setState(() {
+      //   switch (type) {
+      //     case SearchTypes.users:
+      //       _searchResults.unwrapOrNull()?.accounts.addAll(results.accounts);
+      //       break;
+      //     case SearchTypes.statuses:
+      //       _searchResults.unwrapOrNull()?.statuses.addAll(results.statuses);
+      //       break;
+      //     case SearchTypes.hashtags:
+      //       _searchResults.unwrapOrNull()?.hashtags.addAll(results.hashtags);
+      //       break;
+      //   }
+      // });
+    } else {
+      final snackBar = SnackBar(
+        content: Container(
+          padding: EdgeInsets.only(top: 8, bottom: 8),
+          child: Text(''),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return false;
+    }
   }
 
   Future _retrieveResults(String searchQuery) async {
@@ -99,7 +257,7 @@ class _SearchResultsState extends State<SearchResults> {
 
     return Center(
       child: DefaultTabController(
-        length: _ResultOf.values.length,
+        length: SearchTypes.values.length,
         child: Scaffold(
           appBar: AppBar(
             leading: BackButton(
@@ -121,7 +279,7 @@ class _SearchResultsState extends State<SearchResults> {
               },
             ),
             bottom: TabBar(
-              tabs: _ResultOf.values
+              tabs: SearchTypes.values
                   .map(
                     (e) => Tab(text: e.toString().split('.').last),
                   )
@@ -129,11 +287,14 @@ class _SearchResultsState extends State<SearchResults> {
             ),
           ),
           body: TabBarView(
-            children: _ResultOf.values.map((e) {
-              if (e == _ResultOf.users) {
-                return _buildUsersList(context);
-              } else {
-                return Text(e.toString());
+            children: SearchTypes.values.map((e) {
+              switch (e) {
+                case SearchTypes.users:
+                  return _buildUsersList(context);
+                case SearchTypes.statuses:
+                  return _buildStatusesList(context);
+                case SearchTypes.hashtags:
+                  return _buildHashtagsList(context);
               }
             }).toList(),
           ),
