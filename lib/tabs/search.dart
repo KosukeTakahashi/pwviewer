@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pwviewer/constants/constants.dart';
 import 'package:pwviewer/search_results/search_results.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -8,6 +10,7 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
+  bool _authorized = false;
   String _searchQuery = '';
 
   Widget _buildSearchForm(BuildContext context) {
@@ -34,13 +37,20 @@ class _SearchState extends State<Search> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   FloatingActionButton(
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
+                    disabledElevation: 0.0,
+                    backgroundColor: (!_authorized || _searchQuery.isEmpty)
+                        ? Colors.grey
+                        : Theme.of(context).accentColor,
+                    onPressed: (!_authorized || _searchQuery.isEmpty)
+                        ? null
+                        : () {
+                            HapticFeedback.mediumImpact();
 
-                      final args = SearchResultsArguments(_searchQuery);
-                      Navigator.pushNamed(context, SearchResults.routeName,
-                          arguments: args);
-                    },
+                            final args = SearchResultsArguments(_searchQuery);
+                            Navigator.pushNamed(
+                                context, SearchResults.routeName,
+                                arguments: args);
+                          },
                     child: Icon(Icons.search),
                   ),
                 ],
@@ -52,9 +62,39 @@ class _SearchState extends State<Search> {
     );
   }
 
+  Widget _buildDisabledMessage(BuildContext context) {
+    return Card(
+      elevation: 8.0,
+      child: Container(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: Colors.grey,
+            ),
+            Container(width: 16),
+            Text('検索を行うには認証が必要です．\n設定画面から認証キーを設定してください．'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future _checkIfAuthorized() async {
+    final prefs = await SharedPreferences.getInstance();
+    final authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY);
+
+    setState(() {
+      _authorized = authKey != null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+
+    _checkIfAuthorized();
 
     setState(() {
       _searchQuery = '';
@@ -65,7 +105,12 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16),
-      child: _buildSearchForm(context),
+      child: Column(
+        children: [
+          _buildSearchForm(context),
+          _authorized ? Container() : _buildDisabledMessage(context),
+        ],
+      ),
     );
   }
 }

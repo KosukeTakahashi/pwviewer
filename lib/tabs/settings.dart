@@ -96,7 +96,8 @@ class _SettingsState extends State<Settings> {
 
           if (doClear ?? false) {
             final prefs = await SharedPreferences.getInstance();
-            prefs.setString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY, '');
+            // prefs.setString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY, '');
+            prefs.remove(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY);
 
             setState(() {
               _authKey = '';

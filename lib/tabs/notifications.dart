@@ -9,7 +9,7 @@ class _NotificationsState extends State<Notifications> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Notifications'),
+      child: Text('Notifications / Not implemented yet!'),
     );
   }
 }

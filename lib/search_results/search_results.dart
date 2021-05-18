@@ -78,8 +78,11 @@ class _SearchResultsState extends State<SearchResults> {
     if (statuses.isNothing()) {
       return ListView(
         children: [
-          Center(
-            child: CircularProgressIndicator(),
+          Container(
+            padding: EdgeInsets.all(16),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
         ],
       );
@@ -101,8 +104,11 @@ class _SearchResultsState extends State<SearchResults> {
     if (tags.isNothing()) {
       return ListView(
         children: [
-          Center(
-            child: CircularProgressIndicator(),
+          Container(
+            padding: EdgeInsets.all(16),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
         ],
       );
