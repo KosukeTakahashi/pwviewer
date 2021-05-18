@@ -31,8 +31,6 @@ class UserDetails extends StatefulWidget {
 }
 
 class _UserDetailsState extends State<UserDetails> {
-  final _statusesRetrievalUnit = 50;
-
   Maybe<Account> _account = Maybe.nothing();
   Maybe<List<Status>> _statuses = Maybe.nothing();
   Maybe<String> _nextAccountStatusesUrl = Maybe.nothing();
@@ -257,8 +255,7 @@ class _UserDetailsState extends State<UserDetails> {
     // final uri = Uri.parse(getAccountStatusesUrl(accountId, 50));
     final uri = Uri.parse(_nextAccountStatusesUrl.isNothing()
         // ? getAccountStatusesUrl(accountId, limit: _statusesRetrievalUnit)
-        ? getAccountStatusesUrl(_account.map((v) => v.id).unwrap(),
-            limit: _statusesRetrievalUnit)
+        ? getAccountStatusesUrl(_account.map((v) => v.id).unwrap(), limit: 20)
         : _nextAccountStatusesUrl.unwrap());
     final res = await http.get(uri);
     // final nextPage = res.headers['link']?.split(';').first;

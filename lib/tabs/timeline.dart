@@ -21,6 +21,7 @@ class _TimelineState extends State<Timeline> {
   int _limit = 20;
   // List<Status> _statusList = [];
   Maybe<List<Status>> _statusList = Maybe.nothing();
+  Maybe<String> _nextTimelinesUrl = Maybe.nothing();
 
   Future _restoreTimelineLength() async {
     final pref = await SharedPreferences.getInstance();
@@ -32,50 +33,120 @@ class _TimelineState extends State<Timeline> {
     });
   }
 
+  // TODO: 要リファクタリング
   Future _retrieveTimeline() async {
     final prefs = await SharedPreferences.getInstance();
     final authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY) ??
         SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY;
 
     if (authKey == SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY) {
-      final uri = Uri.parse(getLocalTimelineUrl(_limit));
-      final res = await http.get(uri);
-      final List<Status> statusList = jsonDecode(res.body)
-          .cast<Map<String, dynamic>>()
-          .map((e) => Status.fromJson(e))
-          .cast<Status>()
-          .toList();
+      if (_nextTimelinesUrl.isNothing()) {
+        if (_statusList.isNothing()) {
+          final uri = Uri.parse(getLocalTimelineUrl(_limit));
+          final res = await http.get(uri);
 
-      setState(() {
-        _statusList = Maybe.some(statusList);
-      });
-    } else {
-      final uri = Uri.parse(getHomeTimelineUrl(_limit));
-      final res = await http.get(
-        uri,
-        headers: {
-          REQUEST_HEADER_AUTHORIZATION:
-              REQUEST_HEADER_AUTHORIZATION_PREFIX + authKey,
-        },
-      );
+          if (res.statusCode == 200) {
+            var nextPage = res.headers['link']?.split(';').first;
+            nextPage = nextPage?.substring(1, nextPage.length - 1);
 
-      if (res.statusCode == 200) {
-        final statusList = jsonDecode(res.body);
-        setState(() {
-          _statusList = Maybe.some(statusList
+            final List<Status> statusList = jsonDecode(res.body)
+                .cast<Map<String, dynamic>>()
+                .map((e) => Status.fromJson(e))
+                .cast<Status>()
+                .toList();
+
+            setState(() {
+              _statusList = Maybe.some(statusList);
+              _nextTimelinesUrl = Maybe.some(nextPage);
+            });
+          }
+        } else {
+          // do nothing
+        }
+      } else {
+        final uri = Uri.parse(_nextTimelinesUrl.unwrap());
+        final res = await http.get(uri);
+        if (res.statusCode == 200) {
+          var nextPage = res.headers['link']?.split(';').first;
+          nextPage = nextPage?.substring(1, nextPage.length - 1);
+
+          final List<Status> statusList = jsonDecode(res.body)
               .cast<Map<String, dynamic>>()
               .map((e) => Status.fromJson(e))
               .cast<Status>()
-              .toList());
-        });
-      } else {
-        final snackBar = SnackBar(
-          content: Container(
-            padding: EdgeInsets.only(top: 8, bottom: 8),
-            child: Text('ホームタイムラインの取得に失敗しました'),
-          ),
+              .toList();
+
+          setState(() {
+            _statusList.unwrap().addAll(statusList);
+            _nextTimelinesUrl = Maybe.some(nextPage);
+          });
+        }
+      }
+    } else {
+      if (_nextTimelinesUrl.isNothing()) {
+        final uri = Uri.parse(getHomeTimelineUrl(_limit));
+        final res = await http.get(
+          uri,
+          headers: {
+            REQUEST_HEADER_AUTHORIZATION:
+                REQUEST_HEADER_AUTHORIZATION_PREFIX + authKey,
+          },
         );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+        if (res.statusCode == 200) {
+          var nextPage = res.headers['link']?.split(';').first;
+          nextPage = nextPage?.substring(1, nextPage.length - 1);
+
+          final statusList = jsonDecode(res.body);
+          setState(() {
+            _statusList = Maybe.some(statusList
+                .cast<Map<String, dynamic>>()
+                .map((e) => Status.fromJson(e))
+                .cast<Status>()
+                .toList());
+            _nextTimelinesUrl = Maybe.some(nextPage);
+          });
+        } else {
+          final snackBar = SnackBar(
+            content: Container(
+              padding: EdgeInsets.only(top: 8, bottom: 8),
+              child: Text('ホームタイムラインの取得に失敗しました'),
+            ),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }
+      } else {
+        final uri = Uri.parse(_nextTimelinesUrl.unwrap());
+        final res = await http.get(
+          uri,
+          headers: {
+            REQUEST_HEADER_AUTHORIZATION:
+                REQUEST_HEADER_AUTHORIZATION_PREFIX + authKey,
+          },
+        );
+
+        if (res.statusCode == 200) {
+          var nextPage = res.headers['link']?.split(';').first;
+          nextPage = nextPage?.substring(1, nextPage.length - 1);
+
+          final List<Status> statusList = jsonDecode(res.body)
+              .cast<Map<String, dynamic>>()
+              .map((e) => Status.fromJson(e))
+              .cast<Status>()
+              .toList();
+          setState(() {
+            _statusList.unwrap().addAll(statusList);
+            _nextTimelinesUrl = Maybe.some(nextPage);
+          });
+        } else {
+          final snackBar = SnackBar(
+            content: Container(
+              padding: EdgeInsets.only(top: 8, bottom: 8),
+              child: Text('ホームタイムラインの取得に失敗しました'),
+            ),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }
       }
     }
   }
@@ -98,7 +169,11 @@ class _TimelineState extends State<Timeline> {
       // child: StatusesList(_statusList),
       child: _statusList.isNothing()
           ? Center(child: CircularProgressIndicator())
-          : StatusesList(_statusList.unwrap()),
+          // : StatusesList(_statusList.unwrap()),
+          : _nextTimelinesUrl.isNothing()
+              ? StatusesList(_statusList.unwrap())
+              : StatusesList.withReadMore(
+                  _statusList.unwrap(), _retrieveTimeline),
     );
   }
 }
