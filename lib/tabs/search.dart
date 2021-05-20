@@ -10,7 +10,7 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  bool _authorized = false;
+  bool _authorized = true; // falseだと認証済みでも一瞬ログイン要求が表示される
   String _searchQuery = '';
 
   Widget _buildSearchForm(BuildContext context) {
