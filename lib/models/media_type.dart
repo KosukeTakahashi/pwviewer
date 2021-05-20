@@ -1,4 +1,4 @@
-enum Type {
+enum MediaType {
   unknown,
   image,
   gifv,
@@ -6,11 +6,11 @@ enum Type {
   audio,
 }
 
-extension on Type {
+extension on MediaType {
   String get name => this.toString().split('.').last;
 }
 
-class ToType {
+class ToMediaType {
   static fromString(String value) =>
-      Type.values.firstWhere((element) => element.name == value);
+      MediaType.values.firstWhere((element) => element.name == value);
 }

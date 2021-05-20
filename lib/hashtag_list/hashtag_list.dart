@@ -29,6 +29,7 @@ class _HashtagListState extends State<HashtagList> {
       return ListTile(
         leading: Icon(Icons.tag),
         title: Text(widget.tags[index].name),
+        onTap: () {},
       );
     }
   }

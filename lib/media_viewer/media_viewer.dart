@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pwviewer/models/attachment.dart';
-import 'package:pwviewer/models/type.dart';
+import 'package:pwviewer/models/media_type.dart';
 
 class MediaViewerArguments {
   final Attachment attachment;
@@ -29,7 +29,7 @@ class _MediaViewerState extends State<MediaViewer> {
       );
     } else {
       final type = args.attachment.type;
-      if (type == Type.image || type == Type.gifv) {
+      if (type == MediaType.image || type == MediaType.gifv) {
         return Container(
           color: Colors.blueGrey,
           child: Center(

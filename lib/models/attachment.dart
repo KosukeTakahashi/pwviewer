@@ -1,9 +1,9 @@
-import 'type.dart';
+import 'media_type.dart';
 
 class Attachment {
   // Required attributes
   String id;
-  Type type;
+  MediaType type;
   String url;
   String previewUrl;
 
@@ -28,7 +28,7 @@ class Attachment {
 
   Attachment.fromJson(Map<String, dynamic> json)
       : id = json['id'],
-        type = ToType.fromString(json['type']),
+        type = ToMediaType.fromString(json['type']),
         url = json['url'],
         previewUrl = json['preview_url'],
         remoteUrl = json['remote_url'],

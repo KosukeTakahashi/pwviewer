@@ -98,4 +98,12 @@ class Account {
         source = json['source'],
         suspended = json['suspended'],
         muteExpiresAt = json['mute_expires_at'];
+
+  String get displayNameOrUserName {
+    if (this.displayName == '') {
+      return '@${this.username}';
+    } else {
+      return this.displayName;
+    }
+  }
 }

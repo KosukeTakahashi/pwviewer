@@ -13,6 +13,7 @@ const _ACCOUNT_VERIFICATION_URL = '$_ACCOUNT_URL/verify_credentials';
 const _SEARCH_URL = '$_HEADER/api/v2/search?q=';
 const _SEARCH_URL_TYPE_OPTION = 'type=';
 const _SEARCH_URL_OFFSET_OPTION = 'offset=';
+const _NOTIFICATIONS_URL = '$_HEADER/api/v1/notifications';
 
 String getLocalTimelineUrl(int limit) {
   return _LOCAL_TIMELINE_URL_WITH_LIMIT + limit.toString();
@@ -52,4 +53,8 @@ String getSearchWithTypeUrl(String query, SearchTypes type, {int offset = 0}) {
 
 String getSearchByUsernameUrl(String username) {
   return _SEARCH_URL + '$username@pawoo.net';
+}
+
+String getNotificationsUrl() {
+  return _NOTIFICATIONS_URL;
 }
