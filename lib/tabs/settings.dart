@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pwviewer/constants/constants.dart';
+import 'package:pwviewer/utils/maybe.dart';
 import 'package:pwviewer/utils/query_urls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,7 +11,8 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  String _authKey = SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY;
+  // String _authKey = SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY;
+  Maybe<String> _authKey = Maybe.nothing();
   int _tlLength = SHARED_PREFERENCES_DEFAULT_TIMELINE_LENGTH;
 
   Widget _buildAuthorization(BuildContext context) {
@@ -27,14 +29,15 @@ class _SettingsState extends State<Settings> {
         leading: Icon(Icons.vpn_key),
         title: Text('認証キー'),
         subtitle: Text(
-          _authKey.isEmpty ? '<未設定>' : _authKey,
+          // _authKey.isEmpty ? '<未設定>' : _authKey,
+          _authKey.unwrapOrNull() ?? '<未設定>',
           overflow: TextOverflow.ellipsis,
         ),
         onTap: () async {
           final newKey = await showDialog(
             context: context,
             builder: (context) {
-              return _AuthKeyEditorDialog(_authKey);
+              return _AuthKeyEditorDialog(_authKey.unwrapOrNull() ?? '');
             },
           );
 
@@ -100,7 +103,8 @@ class _SettingsState extends State<Settings> {
             prefs.remove(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY);
 
             setState(() {
-              _authKey = '';
+              // _authKey = '';
+              _authKey = Maybe.nothing();
             });
 
             final snackBar = SnackBar(
@@ -151,8 +155,10 @@ class _SettingsState extends State<Settings> {
   Future _restorePreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY) ??
-          SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY;
+      // _authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY) ??
+      //     SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY;
+      _authKey =
+          Maybe.some(prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY));
       _tlLength = prefs.getInt(SHARED_PREFERENCES_KEY_TIMELINE_LENGTH) ??
           SHARED_PREFERENCES_DEFAULT_TIMELINE_LENGTH;
     });

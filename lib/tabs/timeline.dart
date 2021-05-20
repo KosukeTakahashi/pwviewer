@@ -36,10 +36,9 @@ class _TimelineState extends State<Timeline> {
   // TODO: 要リファクタリング
   Future _retrieveTimeline() async {
     final prefs = await SharedPreferences.getInstance();
-    final authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY) ??
-        SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY;
+    final authKey = prefs.getString(SHARED_PREFERENCES_KEY_AUTHORIZATION_KEY);
 
-    if (authKey == SHARED_PREFERENCES_UNSET_AUTHORIZATION_KEY) {
+    if (authKey == null) {
       if (_nextTimelinesUrl.isNothing()) {
         if (_statusList.isNothing()) {
           final uri = Uri.parse(getLocalTimelineUrl(_limit));

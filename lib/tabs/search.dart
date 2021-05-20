@@ -69,12 +69,21 @@ class _SearchState extends State<Search> {
         padding: EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(
-              Icons.info_outline,
-              color: Colors.grey,
+            Flexible(
+              flex: 0,
+              child: Icon(
+                Icons.info_outline,
+                color: Colors.grey,
+              ),
             ),
-            Container(width: 16),
-            Text('検索を行うには認証が必要です．\n設定画面から認証キーを設定してください．'),
+            Flexible(
+              flex: 0,
+              child: Container(width: 16),
+            ),
+            Flexible(
+              flex: 1,
+              child: Text('検索を行うには認証が必要です．\n設定画面から認証キーを設定してください．'),
+            ),
           ],
         ),
       ),
