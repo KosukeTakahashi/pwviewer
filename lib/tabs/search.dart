@@ -82,7 +82,7 @@ class _SearchState extends State<Search> {
             ),
             Flexible(
               flex: 1,
-              child: Text('検索を行うには認証が必要です．\n設定画面から認証キーを設定してください．'),
+              child: Text('検索を行うには認証が必要です\n設定画面から認証キーを設定してください'),
             ),
           ],
         ),
