@@ -43,7 +43,7 @@ class _SettingsState extends State<Settings> {
 
           if (newKey != null) {
             setState(() {
-              _authKey = newKey;
+              _authKey = Maybe.some(newKey);
             });
 
             final prefs = await SharedPreferences.getInstance();
