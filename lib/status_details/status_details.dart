@@ -69,14 +69,25 @@ class _StatusDetailsState extends State<StatusDetails> {
       return FutureBuilder(
         future: retrieveAncestorStatus(),
         builder: (context, dataSnapshot) {
+          var child;
           if (dataSnapshot.connectionState != ConnectionState.done) {
-            return Container();
+            // return Container();
+            child = Container();
           } else if (dataSnapshot.hasError) {
-            return Text('Error: ${dataSnapshot.error}');
+            // return Text('Error: ${dataSnapshot.error}');
+            child = Text('Error: ${dataSnapshot.error}');
           } else {
             final ancestorStatus = dataSnapshot.data as Status;
-            return StatusItem.replyAncestor(ancestorStatus, _launchBrowser);
+            // return StatusItem.replyAncestor(ancestorStatus, _launchBrowser);
+            child = StatusItem.replyAncestor(ancestorStatus, _launchBrowser);
           }
+
+          return AnimatedSwitcher(
+            duration: Duration(milliseconds: 200),
+            // transitionBuilder: (child, anim) =>
+            //     ScaleTransition(child: child, scale: anim),
+            child: child,
+          );
         },
       );
     }
