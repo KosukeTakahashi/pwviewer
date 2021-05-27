@@ -16,6 +16,8 @@ class MediaViewer extends StatefulWidget {
 }
 
 class _MediaViewerState extends State<MediaViewer> {
+  bool _showBackButton = true;
+
   @override
   Widget build(BuildContext context) {
     final args =
@@ -30,10 +32,27 @@ class _MediaViewerState extends State<MediaViewer> {
     } else {
       final type = args.attachment.type;
       if (type == MediaType.image || type == MediaType.gifv) {
-        return Container(
-          color: Colors.blueGrey,
-          child: Center(
-            child: Image.network(args.attachment.url),
+        return Scaffold(
+          backgroundColor: Colors.blueGrey,
+          body: Container(
+            height: double.infinity,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                setState(() {
+                  _showBackButton = !_showBackButton;
+                });
+              },
+              child: InteractiveViewer(
+                child: Image.network(args.attachment.url),
+              ),
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Icon(Icons.arrow_back),
           ),
         );
       } else {
