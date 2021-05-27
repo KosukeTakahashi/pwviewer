@@ -289,11 +289,25 @@ class _SearchResultsState extends State<SearchResults> {
             },
           ),
           bottom: TabBar(
-            tabs: SearchTypes.values
-                .map(
-                  (e) => Tab(text: e.toString().split('.').last),
-                )
-                .toList(),
+            tabs: SearchTypes.values.map((e) {
+              switch (e) {
+                case SearchTypes.users:
+                  return Tab(
+                    text: 'ユーザ',
+                    icon: Icon(Icons.person_outline),
+                  );
+                case SearchTypes.statuses:
+                  return Tab(
+                    text: 'トゥート',
+                    icon: Icon(Icons.message_outlined),
+                  );
+                case SearchTypes.hashtags:
+                  return Tab(
+                    text: 'タグ',
+                    icon: Icon(Icons.tag),
+                  );
+              }
+            }).toList(),
           ),
         ),
         body: TabBarView(
