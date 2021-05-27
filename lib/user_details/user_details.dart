@@ -7,7 +7,9 @@ import 'package:http/http.dart' as http;
 import 'package:pwviewer/avatar/avatar.dart';
 import 'package:pwviewer/constants/constants.dart';
 import 'package:pwviewer/in_app_browser/my_chrome_safari_browser.dart';
+import 'package:pwviewer/media_viewer/media_viewer.dart';
 import 'package:pwviewer/models/account.dart';
+import 'package:pwviewer/models/attachment.dart';
 import 'package:pwviewer/models/results.dart';
 import 'package:pwviewer/models/status.dart';
 import 'package:pwviewer/statuses_list/status_item.dart';
@@ -45,7 +47,13 @@ class _UserDetailsState extends State<UserDetails> {
   }
 
   Widget _buildHeader(BuildContext context, Account account) {
-    return Image.network(account.header);
+    return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          final args = MediaViewerArguments.imageUrl(account.header);
+          Navigator.pushNamed(context, MediaViewer.routeName, arguments: args);
+        },
+        child: Image.network(account.header));
   }
 
   Widget _buildAvatar(BuildContext context, Account account) {

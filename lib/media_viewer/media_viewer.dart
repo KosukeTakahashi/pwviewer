@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:pwviewer/models/attachment.dart';
 import 'package:pwviewer/models/media_type.dart';
+import 'package:pwviewer/utils/maybe.dart';
 
 class MediaViewerArguments {
-  final Attachment attachment;
+  final Maybe<Attachment> attachment;
+  final Maybe<String> imageUrl;
 
-  MediaViewerArguments(this.attachment);
+  MediaViewerArguments(Attachment attachment)
+      : this.attachment = Maybe.some(attachment),
+        this.imageUrl = Maybe.nothing();
+
+  MediaViewerArguments.imageUrl(String url)
+      : this.attachment = Maybe.nothing(),
+        this.imageUrl = Maybe.some(url);
 }
 
 class MediaViewer extends StatefulWidget {
@@ -30,8 +38,13 @@ class _MediaViewerState extends State<MediaViewer> {
         ),
       );
     } else {
-      final type = args.attachment.type;
-      if (type == MediaType.image || type == MediaType.gifv) {
+      // final type = args.attachment.unwrapOrNull()?.type;
+      final isImage = args.attachment
+              .map((v) => v.type == MediaType.image || v.type == MediaType.gifv)
+              .unwrapOrNull() ??
+          true;
+      // if (type == null || type == MediaType.image || type == MediaType.gifv) {
+      if (isImage) {
         return Scaffold(
           backgroundColor: Colors.blueGrey,
           body: Container(
@@ -44,7 +57,8 @@ class _MediaViewerState extends State<MediaViewer> {
                 });
               },
               child: InteractiveViewer(
-                child: Image.network(args.attachment.url),
+                child: Image.network(args.imageUrl.unwrapOrNull() ??
+                    args.attachment.unwrap().url),
               ),
             ),
           ),
