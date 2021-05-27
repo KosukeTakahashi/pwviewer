@@ -261,49 +261,52 @@ class _SearchResultsState extends State<SearchResults> {
     final args =
         ModalRoute.of(context)?.settings.arguments as SearchResultsArguments?;
 
-    return Center(
-      child: DefaultTabController(
-        length: SearchTypes.values.length,
-        child: Scaffold(
-          appBar: AppBar(
-            leading: BackButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            title: TextFormField(
-              initialValue: args?.searchQuery ?? '',
-              decoration: InputDecoration(suffixIcon: Icon(Icons.search)),
-              textInputAction: TextInputAction.search,
-              onFieldSubmitted: (newQuery) {
+    return DefaultTabController(
+      length: SearchTypes.values.length,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: BackButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          title: TextFormField(
+            initialValue: args?.searchQuery ?? '',
+            decoration: InputDecoration(suffixIcon: Icon(Icons.search)),
+            textInputAction: TextInputAction.search,
+            onFieldSubmitted: (newQuery) {
+              if (newQuery != '') {
                 final args = SearchResultsArguments(newQuery);
                 Navigator.pushNamed(
                   context,
                   SearchResults.routeName,
                   arguments: args,
                 );
-              },
-            ),
-            bottom: TabBar(
-              tabs: SearchTypes.values
-                  .map(
-                    (e) => Tab(text: e.toString().split('.').last),
-                  )
-                  .toList(),
-            ),
-          ),
-          body: TabBarView(
-            children: SearchTypes.values.map((e) {
-              switch (e) {
-                case SearchTypes.users:
-                  return _buildUsersList(context);
-                case SearchTypes.statuses:
-                  return _buildStatusesList(context);
-                case SearchTypes.hashtags:
-                  return _buildHashtagsList(context);
               }
-            }).toList(),
+            },
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
           ),
+          bottom: TabBar(
+            tabs: SearchTypes.values
+                .map(
+                  (e) => Tab(text: e.toString().split('.').last),
+                )
+                .toList(),
+          ),
+        ),
+        body: TabBarView(
+          children: SearchTypes.values.map((e) {
+            switch (e) {
+              case SearchTypes.users:
+                return _buildUsersList(context);
+              case SearchTypes.statuses:
+                return _buildStatusesList(context);
+              case SearchTypes.hashtags:
+                return _buildHashtagsList(context);
+            }
+          }).toList(),
         ),
       ),
     );
