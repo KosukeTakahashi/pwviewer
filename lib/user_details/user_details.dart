@@ -70,7 +70,8 @@ class _UserDetailsState extends State<UserDetails> {
           style: Theme.of(context).textTheme.headline5,
         ),
         Text(
-          '@${account.username}',
+          // '@${account.username}',
+          '@${account.acct}',
           style: Theme.of(context).textTheme.caption,
         ),
       ],

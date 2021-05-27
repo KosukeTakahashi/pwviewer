@@ -71,7 +71,7 @@ class StatusItem extends StatelessWidget {
         Flexible(
           flex: 0,
           child: Text(
-            '@${status.account.username}',
+            '@${status.account.acct}',
             style: Theme.of(context).textTheme.caption,
             overflow: TextOverflow.ellipsis,
           ),

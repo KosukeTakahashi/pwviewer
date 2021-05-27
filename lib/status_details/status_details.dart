@@ -134,7 +134,7 @@ class _StatusDetailsState extends State<StatusDetails> {
           style: Theme.of(context).textTheme.subtitle2,
         ),
         Text(
-          '@${account.username}',
+          '@${account.acct}',
           style: Theme.of(context).textTheme.caption,
         ),
       ],
