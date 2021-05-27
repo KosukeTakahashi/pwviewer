@@ -396,17 +396,38 @@ class StatusItem extends StatelessWidget {
                     padding: EdgeInsets.only(left: 64),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.repeat,
-                          color: Theme.of(context).textTheme.caption!.color,
-                          size: Theme.of(context).textTheme.caption!.fontSize,
+                        Flexible(
+                          flex: 0,
+                          child: Icon(
+                            Icons.repeat,
+                            color: Theme.of(context).textTheme.caption!.color,
+                            size: Theme.of(context).textTheme.caption!.fontSize,
+                          ),
                         ),
-                        Container(
-                          padding: EdgeInsets.only(left: 4),
+                        // Container(
+                        //   padding: EdgeInsets.only(left: 4),
+                        //   child: Text(
+                        //     '${_status.account.displayName} さんがブースト',
+                        //     style: Theme.of(context).textTheme.caption,
+                        //   ),
+                        // ),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        Flexible(
+                          flex: 1,
                           child: Text(
-                            '${_status.account.displayName} さんがブースト',
+                            _status.account.displayName,
+                            overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.caption,
                           ),
+                        ),
+                        Text(
+                          'さんがブースト',
+                          style: Theme.of(context).textTheme.caption,
+                        ),
+                        SizedBox(
+                          width: 8,
                         ),
                       ],
                     ),
