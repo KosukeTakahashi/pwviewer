@@ -48,12 +48,13 @@ class _UserDetailsState extends State<UserDetails> {
 
   Widget _buildHeader(BuildContext context, Account account) {
     return GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          final args = MediaViewerArguments.imageUrl(account.header);
-          Navigator.pushNamed(context, MediaViewer.routeName, arguments: args);
-        },
-        child: Image.network(account.header));
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        final args = MediaViewerArguments.imageUrl(account.header);
+        Navigator.pushNamed(context, MediaViewer.routeName, arguments: args);
+      },
+      child: Image.network(account.header),
+    );
   }
 
   Widget _buildAvatar(BuildContext context, Account account) {
