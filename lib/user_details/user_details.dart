@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart' as html;
@@ -9,7 +8,6 @@ import 'package:pwviewer/constants/constants.dart';
 import 'package:pwviewer/in_app_browser/my_chrome_safari_browser.dart';
 import 'package:pwviewer/media_viewer/media_viewer.dart';
 import 'package:pwviewer/models/account.dart';
-import 'package:pwviewer/models/attachment.dart';
 import 'package:pwviewer/models/results.dart';
 import 'package:pwviewer/models/status.dart';
 import 'package:pwviewer/statuses_list/status_item.dart';
@@ -36,6 +34,7 @@ class _UserDetailsState extends State<UserDetails> {
   Maybe<Account> _account = Maybe.nothing();
   Maybe<List<Status>> _statuses = Maybe.nothing();
   Maybe<String> _nextAccountStatusesUrl = Maybe.nothing();
+  bool _hasNextPage = true;
 
   Future _launchBrowser(String url) async {
     await widget.browser.open(
@@ -268,7 +267,6 @@ class _UserDetailsState extends State<UserDetails> {
         ? getAccountStatusesUrl(_account.map((v) => v.id).unwrap(), limit: 20)
         : _nextAccountStatusesUrl.unwrap());
     final res = await http.get(uri);
-    // final nextPage = res.headers['link']?.split(';').first;
     if (res.statusCode == 200) {
       final statuses = jsonDecode(res.body)
           .cast<Map<String, dynamic>>()
@@ -333,6 +331,9 @@ class _UserDetailsState extends State<UserDetails> {
         body: Center(child: Text('The argument was null')),
       );
     } else {
+      final itemCount =
+          1 + (_statuses.unwrapOrNull()?.length ?? 0) + (_hasNextPage ? 1 : 0);
+
       return Scaffold(
         appBar: AppBar(
           leading: BackButton(
@@ -347,15 +348,7 @@ class _UserDetailsState extends State<UserDetails> {
         body: ListView.separated(
           itemBuilder: _buildTiles,
           separatorBuilder: (ctx, idx) => Divider(),
-          itemCount:
-              // _account.isNothing() ? 1 : _account.unwrap().statusesCount + 1,
-              _statuses.isNothing()
-                  ? 1
-                  : 1 +
-                      min(
-                        _account.unwrapOrNull()?.statusesCount ?? 0,
-                        _statuses.unwrap().length,
-                      ),
+          itemCount: itemCount,
         ),
       );
     }
